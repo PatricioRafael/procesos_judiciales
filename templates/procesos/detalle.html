@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Proceso {{ proceso.nurej|default:proceso.nro_correlativo }}{% endblock %}
+{% block page_title %}Expediente{% endblock %}
+{% block nav_expedientes %}active{% endblock %}
+
+{% block content %}
+<a href="{% url 'procesos:listado' %}" class="text-muted-gadp small d-inline-block mb-3">
+    <i class="bi bi-arrow-left"></i> Volver a Expedientes
+</a>
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <span class="text-muted-gadp small text-uppercase" style="letter-spacing:.08em;">{{ proceso.categoria.nombre }} · Nº {{ proceso.nro_correlativo }}</span>
+        <h3 class="mb-1">{{ proceso.nurej|default:"NUREJ sin asignar" }}</h3>
+        <p class="text-muted-gadp mb-0"><i class="bi bi-bank"></i> {{ proceso.juzgado.nombre }}</p>
+    </div>
+    <div class="text-end">
+        <span class="badge-estado {% if proceso.estado_actual.es_final %}badge-estado-final{% else %}badge-estado-activo{% endif %} fs-6">
+            {{ proceso.estado_actual.nombre }}
+        </span><br>
+        {% if puede_editar %}
+        <a href="{% url 'procesos:editar' proceso.pk %}" class="btn btn-gold btn-sm mt-2">
+            <i class="bi bi-pencil"></i> Editar datos
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-people"></i> Partes procesales</div>
+            <ul class="list-group list-group-flush">
+                {% for pp in proceso.partes.all %}
+                    <li class="list-group-item"><strong>{{ pp.get_rol_display }}:</strong> {{ pp.parte.nombre }}</li>
+                {% empty %}
+                    <li class="list-group-item text-muted-gadp">Sin partes registradas</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if proceso.detalle_contrato %}
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-file-earmark-text"></i> Detalle de contrato</div>
+            <div class="card-body small">
+                <p><strong>Proyecto:</strong> {{ proceso.detalle_contrato.proyecto|default:"—" }}</p>
+                <p><strong>Contrato:</strong> {{ proceso.detalle_contrato.nro_contrato|default:"—" }}</p>
+                <p class="mb-0"><strong>Fecha:</strong> {{ proceso.detalle_contrato.fecha_contrato|default:"—" }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card mb-3">
+            <div class="card-header"><i class="bi bi-person-badge"></i> Doctor responsable</div>
+            <div class="card-body d-flex align-items-center gap-2">
+                <div class="avatar-circle" style="width:34px;height:34px;font-size:.85rem;">
+                    {{ proceso.doctor_responsable.first_name|first|upper|default:"—" }}
+                </div>
+                {{ proceso.doctor_responsable.get_full_name|default:"Sin asignar" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history"></i> Historial de actuaciones</span>
+                {% if puede_editar %}
+                <a class="btn btn-primary btn-sm" href="{% url 'procesos:agregar_historial' proceso.pk %}">
+                    <i class="bi bi-plus-lg"></i> Añadir
+                </a>
+                {% endif %}
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for h in proceso.historial.all %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">{{ h.estado_nuevo.nombre }}</span>
+                        <span class="text-muted-gadp small">{{ h.fecha_modificacion|default:h.creado_en|date:"d/m/Y" }}</span>
+                    </div>
+                    <p class="mb-0 small">{{ h.observacion }}</p>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted-gadp">Sin actuaciones registradas</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clipboard-check"></i> Acciones futuras</span>
+                {% if puede_editar %}
+                <a class="btn btn-primary btn-sm" href="{% url 'procesos:agregar_accion' proceso.pk %}">
+                    <i class="bi bi-plus-lg"></i> Añadir
+                </a>
+                {% endif %}
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for a in proceso.acciones_futuras.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="{% if a.completada %}text-decoration-line-through text-muted-gadp{% endif %}">
+                        {% if a.completada %}<i class="bi bi-check-circle text-success"></i>{% else %}<i class="bi bi-circle text-muted-gadp"></i>{% endif %}
+                        {{ a.descripcion }}
+                    </span>
+                    <span class="text-muted-gadp small">{{ a.fecha_limite|default:"" }}</span>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted-gadp">Sin acciones pendientes</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

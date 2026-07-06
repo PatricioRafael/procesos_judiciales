@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión - Potosí Judicial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                linear-gradient(160deg, rgba(28,25,23,.75), rgba(139,0,0,.55)),
+                repeating-linear-gradient(135deg, #2a2622 0px, #2a2622 2px, #322d28 2px, #322d28 40px);
+            padding: 1rem;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 1rem;
+            padding: 2.5rem 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0,0,0,.25);
+        }
+        .login-logo {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: #8b0000;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin: 0 auto 1rem;
+        }
+        .login-card h1 { font-size: 1.3rem; font-weight: 700; text-align: center; color: #1c1917; margin-bottom: .1rem; }
+        .login-card p.subtitle { text-align: center; color: #a8a29e; font-size: .85rem; margin-bottom: 1.75rem; }
+        .login-card label { font-size: .8rem; font-weight: 600; color: #8b0000; margin-bottom: .3rem; }
+        .input-icon { position: relative; margin-bottom: 1.1rem; }
+        .input-icon i {
+            position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+            color: #a8a29e;
+        }
+        .input-icon input {
+            width: 100%;
+            padding: .6rem .9rem .6rem 2.3rem;
+            border: 1px solid #e5e7eb;
+            border-radius: .5rem;
+            font-family: 'Outfit', sans-serif;
+        }
+        .input-icon input:focus {
+            outline: none;
+            border-color: #8b0000;
+            box-shadow: 0 0 0 3px #8b00001a;
+        }
+        .login-extra { display: flex; justify-content: space-between; align-items: center; font-size: .82rem; margin-bottom: 1.3rem; }
+        .login-extra a { color: #8b0000; text-decoration: none; }
+        .btn-login {
+            width: 100%;
+            background: #8b0000;
+            color: #fff;
+            border: none;
+            border-radius: .5rem;
+            padding: .7rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+        }
+        .btn-login:hover { background: #6e0000; color: #fff; }
+        .login-footer-note {
+            text-align: center;
+            font-size: .75rem;
+            color: #a8a29e;
+            margin-top: 1.2rem;
+        }
+        .page-footer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            text-align: center;
+            padding: .8rem;
+            font-size: .75rem;
+            color: rgba(255,255,255,.75);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-logo">PJ</div>
+        <h1>GADP</h1>
+        <p class="subtitle">Sistema de Procesos Judiaciles</p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger py-2 small">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <label>Usuario o Correo Electrónico</label>
+            <div class="input-icon">
+                <i class="bi bi-person"></i>
+                <input type="text" name="username" placeholder="Ingrese su usuario" required autofocus>
+            </div>
+
+            <label>Contraseña</label>
+            <div class="input-icon">
+                <i class="bi bi-lock"></i>
+                <input type="password" name="password" placeholder="Ingrese su contraseña" required>
+            </div>
+
+            <div class="login-extra">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="recordarme">
+                    <label class="form-check-label" for="recordarme">Recordarme</label>
+                </div>
+                <a href="#">¿Olvidó su contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Ingresar <i class="bi bi-box-arrow-in-right"></i></button>
+        </form>
+
+        <p class="login-footer-note"><i class="bi bi-shield-lock"></i> Conexión Segura Cifrada</p>
+    </div>
+
+    <div class="page-footer">
+        © 2026 Gobierno Autónomo Departamental de Potosí. Todos los derechos reservados.
+    </div>
+</body>
+</html>

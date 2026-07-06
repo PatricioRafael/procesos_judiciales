@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Panel de Control{% endblock %} - Potosí Judicial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --color-ink: #1c1917;
+            --color-gray: #a8a29e;
+            --color-red: #8b0000;
+            --color-red-soft: #8b00001a;
+            --color-gold: #c5a059;
+            --color-bg: #f9f8f6;
+            --color-border: #e5e7eb;
+
+            --bs-body-font-family: 'Outfit', sans-serif;
+            --bs-body-bg: var(--color-bg);
+            --bs-body-color: var(--color-ink);
+            --bs-primary: var(--color-red);
+            --bs-primary-rgb: 139, 0, 0;
+            --bs-link-color: var(--color-red);
+            --bs-link-hover-color: var(--color-gold);
+            --bs-border-color: var(--color-border);
+
+            --sidebar-width: 260px;
+        }
+
+        body { font-family: 'Outfit', sans-serif; }
+        h1, h2, h3, h4, h5 { font-weight: 700; letter-spacing: -0.01em; }
+
+        /* ============ SIDEBAR ============ */
+        .sidebar {
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: #fff;
+            border-right: 1px solid var(--color-border);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: 0 .25rem 1.25rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .sidebar-brand .logo-circle {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: var(--color-red);
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .sidebar-brand h1 {
+            font-size: 1rem;
+            margin: 0;
+            color: var(--color-ink);
+        }
+        .sidebar-brand small {
+            display: block;
+            font-size: .68rem;
+            color: var(--color-gray);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+        }
+        .btn-nuevo-proceso {
+            background: var(--color-red);
+            color: #fff;
+            border: none;
+            border-radius: .6rem;
+            padding: .65rem 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 1.25rem;
+        }
+        .btn-nuevo-proceso:hover { background: #6e0000; color: #fff; }
+
+        .sidebar-nav { flex: 1; }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            padding: .65rem .75rem;
+            border-radius: .5rem;
+            color: var(--color-ink);
+            font-size: .92rem;
+            margin-bottom: .2rem;
+        }
+        .sidebar-nav a:hover { background: var(--color-red-soft); }
+        .sidebar-nav a.active {
+            background: var(--color-red-soft);
+            color: var(--color-red);
+            font-weight: 600;
+            border-left: 3px solid var(--color-red);
+        }
+        .sidebar-nav a i { font-size: 1.05rem; width: 1.2rem; text-align: center; }
+
+        .sidebar-footer a {
+            display: flex; align-items: center; gap: .6rem;
+            color: var(--color-gray);
+            font-size: .9rem;
+            padding: .5rem .75rem;
+        }
+        .sidebar-footer a:hover { color: var(--color-red); }
+
+        /* ============ CONTENIDO PRINCIPAL ============ */
+        .main-wrapper { margin-left: var(--sidebar-width); }
+
+        .topbar {
+            background: #fff;
+            border-bottom: 1px solid var(--color-border);
+            padding: .9rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .topbar h4 { margin: 0; font-size: 1.2rem; }
+        .topbar-search {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 2rem;
+            padding: .45rem 1rem;
+            display: flex; align-items: center; gap: .5rem;
+            min-width: 280px;
+            color: var(--color-gray);
+        }
+        .topbar-search input {
+            border: none; background: transparent; outline: none;
+            width: 100%; font-family: 'Outfit', sans-serif;
+        }
+        .topbar-icon {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--color-ink);
+        }
+        .avatar-circle {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: var(--color-ink);
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600;
+        }
+
+        .content-area { padding: 2rem; }
+
+        /* ============ COMPONENTES REUTILIZABLES ============ */
+        .card { border: 1px solid var(--color-border); border-radius: 1rem; }
+        .card-header { background: #fff; border-bottom: 1px solid var(--color-border); font-weight: 600; }
+
+        .btn-primary { background-color: var(--color-red); border-color: var(--color-red); }
+        .btn-primary:hover { background-color: #6e0000; border-color: #6e0000; }
+        .btn-gold { background-color: var(--color-gold); border-color: var(--color-gold); color: var(--color-ink); font-weight: 600; }
+        .btn-gold:hover { background-color: #b08d47; color: #fff; }
+
+        .badge-estado { font-weight: 500; border-radius: 999px; padding: .4em .9em; display: inline-block; }
+        .badge-estado-activo { background-color: var(--color-red-soft); color: var(--color-red); }
+        .badge-estado-final { background-color: var(--color-border); color: var(--color-gray); }
+
+        .table thead { background-color: var(--color-ink); }
+        .table thead th { color: #fff; font-weight: 500; border: none; }
+        .table-hover tbody tr:hover { background-color: var(--color-red-soft); }
+
+        a { text-decoration: none; }
+        .text-muted-gadp { color: var(--color-gray); }
+
+        /* Tarjetas de métricas del panel */
+        .stat-card { border: 1px solid var(--color-border); border-radius: 1rem; padding: 1.1rem 1.3rem; background: #fff; }
+        .stat-card .stat-icon {
+            width: 38px; height: 38px; border-radius: .6rem;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+        }
+        .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--color-gray); font-weight: 600; }
+        .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--color-ink); }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="logo-circle">PJ</div>
+        <div>
+            <h1>GADP</h1>
+            <small>Sistema de Procesos Judiciales</small>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <a href="{% url 'procesos:crear' %}" class="btn-nuevo-proceso text-center">
+        <i class="bi bi-plus-lg"></i> Nuevo Proceso
+    </a>
+
+    <nav class="sidebar-nav">
+        <a href="{% url 'procesos:listado' %}" class="{% block nav_panel %}{% endblock %}">
+            <i class="bi bi-grid-1x2"></i> Panel de Control
+        </a>
+        <a href="{% url 'procesos:listado' %}" class="{% block nav_expedientes %}{% endblock %}">
+            <i class="bi bi-folder2-open"></i> Expedientes
+        </a>
+        <a href="#" class="text-muted-gadp">
+            <i class="bi bi-calendar3"></i> Calendario <small>(próximamente)</small>
+        </a>
+        <a href="#" class="text-muted-gadp">
+            <i class="bi bi-bell"></i> Notificaciones <small>(próximamente)</small>
+        </a>
+        {% if user.is_superuser or user.perfil.es_admin_juridico %}
+        <a href="{% url 'admin:index' %}">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+        {% endif %}
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+    </div>
+    {% endif %}
+</aside>
+
+<div class="main-wrapper">
+    {% if user.is_authenticated %}
+    <div class="topbar">
+        <h4>{% block page_title %}Panel de Control{% endblock %}</h4>
+        <div class="d-flex align-items-center gap-3">
+            <form class="topbar-search" method="get" action="{% url 'procesos:listado' %}">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por NUREJ o Nombre...">
+            </form>
+            <div class="topbar-icon"><i class="bi bi-bell"></i></div>
+            <div class="topbar-icon"><i class="bi bi-question-lg"></i></div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="avatar-circle">{{ user.first_name|first|upper|default:user.username|first|upper }}</div>
+                <div class="small lh-sm">
+                    <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="text-muted-gadp">
+                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% else %}Doctor{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="content-area">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

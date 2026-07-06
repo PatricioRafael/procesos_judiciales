@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block page_title %}Nuevo Proceso{% endblock %}
+{% block nav_expedientes %}active{% endblock %}
+{% block title %}Nuevo proceso{% endblock %}
+
+{% block content %}
+<a href="{% url 'procesos:listado' %}" class="text-muted-gadp small d-inline-block mb-3">
+    <i class="bi bi-arrow-left"></i> Volver a Expedientes
+</a>
+
+<h3 class="mb-1">Registro de Nuevo Proceso</h3>
+<p class="text-muted-gadp mb-4">Complete los detalles a continuación para iniciar un nuevo expediente judicial.</p>
+
+<!-- Indicador de pasos -->
+<div class="d-flex justify-content-between align-items-center mb-4" style="max-width:520px;">
+    <div class="step-indicator d-flex flex-column align-items-center flex-fill" data-step="1">
+        <div class="step-circle">1</div><small class="mt-1">Detalles</small>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-indicator d-flex flex-column align-items-center flex-fill" data-step="2">
+        <div class="step-circle">2</div><small class="mt-1">Partes</small>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-indicator d-flex flex-column align-items-center flex-fill" data-step="3">
+        <div class="step-circle">3</div><small class="mt-1">Fundamentos</small>
+    </div>
+    <div class="step-line"></div>
+    <div class="step-indicator d-flex flex-column align-items-center flex-fill" data-step="4">
+        <div class="step-circle">4</div><small class="mt-1">Documentos</small>
+    </div>
+</div>
+
+<style>
+    .step-circle {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: var(--color-border); color: var(--color-gray);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .9rem;
+    }
+    .step-indicator small { color: var(--color-gray); font-size: .75rem; }
+    .step-indicator.activo .step-circle { background: var(--color-red); color: #fff; }
+    .step-indicator.activo small { color: var(--color-red); font-weight: 600; }
+    .step-indicator.completado .step-circle { background: var(--color-gold); color: #fff; }
+    .step-line { flex: 0 0 40px; height: 2px; background: var(--color-border); margin: 0 .3rem 1.2rem; }
+    .form-step { display: none; }
+    .form-step.activo { display: block; }
+    .is-invalid { border-color: var(--color-red) !important; }
+</style>
+
+<form method="post" enctype="multipart/form-data" novalidate class="card p-4">
+    {% csrf_token %}
+
+    <!-- PASO 1: Detalles del caso -->
+    <div class="form-step" data-step="1">
+        <h5 class="mb-3">Paso 1: Detalles del Caso</h5>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">{{ form.categoria.label }}</label>
+                {{ form.categoria }}
+                {{ form.categoria.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{{ form.nurej.label }}</label>
+                {{ form.nurej }}
+                {{ form.nurej.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" id="label-tipo-proceso">{{ form.tipo_proceso.label }}</label>
+                {{ form.tipo_proceso }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" id="label-juzgado">{{ form.juzgado.label }}</label>
+                {{ form.juzgado }}
+                {{ form.juzgado.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{{ form.estado_actual.label }}</label>
+                {{ form.estado_actual }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">{{ form.fecha_registro.label }}</label>
+                {{ form.fecha_registro }}
+            </div>
+
+            <div class="col-12" id="bloque-contencioso" style="display:none;">
+                <hr>
+                <p class="fw-semibold text-uppercase small" style="color:var(--color-red);">Detalles específicos: Contencioso</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.parte_activa.label }} (Empresa demandante)</label>
+                        {{ form.parte_activa }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.proyecto.label }}</label>
+                        {{ form.proyecto }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.nro_contrato.label }}</label>
+                        {{ form.nro_contrato }}
+                        {{ form.nro_contrato.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ form.fecha_contrato.label }}</label>
+                        {{ form.fecha_contrato }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{{ form.motivo_demanda.label }}</label>
+                        {{ form.motivo_demanda }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASO 2: Partes -->
+    <div class="form-step" data-step="2">
+        <h5 class="mb-3">Paso 2: Partes Procesales</h5>
+        <div class="row g-3" id="bloque-partes-generales">
+            <div class="col-md-6">
+                <label class="form-label" id="label-parte-activa">{{ form.parte_activa.label }}</label>
+                {{ form.parte_activa }}
+                <div class="form-text">{{ form.parte_activa.help_text }}</div>
+                {{ form.parte_activa.errors }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" id="label-parte-pasiva">{{ form.parte_pasiva.label }}</label>
+                {{ form.parte_pasiva }}
+                <div class="form-text">{{ form.parte_pasiva.help_text }}</div>
+            </div>
+        </div>
+        <div id="nota-contencioso-partes" class="alert alert-light border" style="display:none;">
+            <i class="bi bi-info-circle"></i> En procesos <strong>Contenciosos</strong>, la parte demandada es siempre el
+            <strong>Gobierno Autónomo Departamental de Potosí</strong> — no necesitas indicarla aquí, ya la registramos
+            automáticamente. La empresa demandante la escribiste en el Paso 1.
+        </div>
+    </div>
+
+    <!-- PASO 3: Fundamentos -->
+    <div class="form-step" data-step="3">
+        <h5 class="mb-3">Paso 3: Fundamentos</h5>
+        <label class="form-label">{{ form.observacion_inicial.label }}</label>
+        {{ form.observacion_inicial }}
+        <div class="form-text">{{ form.observacion_inicial.help_text }}</div>
+    </div>
+
+    <!-- PASO 4: Documentos -->
+    <div class="form-step" data-step="4">
+        <h5 class="mb-3">Paso 4: Documentos</h5>
+        <p class="text-muted-gadp small">Adjunta memoriales, resoluciones u otros documentos del expediente (opcional).</p>
+        <input type="file" name="documentos" multiple class="form-control">
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" id="btn-anterior" class="btn btn-outline-secondary" style="display:none;">
+            <i class="bi bi-arrow-left"></i> Anterior
+        </button>
+        <div class="ms-auto">
+            <button type="button" id="btn-siguiente" class="btn btn-primary">
+                Siguiente <i class="bi bi-arrow-right"></i>
+            </button>
+            <button type="submit" id="btn-guardar" class="btn btn-primary" style="display:none;">
+                <i class="bi bi-check-lg"></i> Guardar Proceso
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+const ETIQUETAS = {
+    "Contencioso":     { tipo: "Motivo de la demanda" },
+    "Civil":           { activa: "Demandante", pasiva: "Demandado", tipo: "Tipo de proceso" },
+    "Agroambiental":   { activa: "Demandante", pasiva: "Demandado", tipo: "Tipo de proceso" },
+    "Coactivo social": { activa: "Demandante", pasiva: "Demandado", tipo: "Tipo de proceso" },
+    "Laboral":         { activa: "Demandante", pasiva: "Demandado", tipo: "Tipo de proceso" },
+    "Constitucional":  { activa: "Accionante", pasiva: "Accionado", tipo: "Tipo de acción" },
+    "Coactivo fiscal": { activa: "Demandante", pasiva: "Coactivo", tipo: "Tipo de proceso" },
+};
+
+const selectCategoria = document.querySelector("#id_categoria");
+const labelTipo = document.querySelector("#label-tipo-proceso");
+const labelJuzgado = document.querySelector("#label-juzgado");
+const labelActiva = document.querySelector("#label-parte-activa");
+const labelPasiva = document.querySelector("#label-parte-pasiva");
+const bloqueContencioso = document.querySelector("#bloque-contencioso");
+const bloquePartesGenerales = document.querySelector("#bloque-partes-generales");
+const notaContencioso = document.querySelector("#nota-contencioso-partes");
+
+function actualizarPorCategoria() {
+    const nombreCategoria = selectCategoria.options[selectCategoria.selectedIndex].text.trim();
+    const config = ETIQUETAS[nombreCategoria];
+    if (!config) return;
+
+    labelTipo.textContent = config.tipo;
+    labelJuzgado.textContent = nombreCategoria === "Constitucional" ? "Sala constitucional" : "Juzgado";
+
+    const esContencioso = nombreCategoria === "Contencioso";
+    bloqueContencioso.style.display = esContencioso ? "block" : "none";
+    bloquePartesGenerales.style.display = esContencioso ? "none" : "flex";
+    notaContencioso.style.display = esContencioso ? "block" : "none";
+
+    if (!esContencioso) {
+        labelActiva.textContent = config.activa;
+        labelPasiva.textContent = config.pasiva;
+    }
+}
+selectCategoria.addEventListener("change", actualizarPorCategoria);
+
+// ---- Navegación entre pasos ----
+let pasoActual = 1;
+const TOTAL_PASOS = 4;
+
+function mostrarPaso(n) {
+    document.querySelectorAll(".form-step").forEach(el => {
+        el.classList.toggle("activo", parseInt(el.dataset.step) === n);
+    });
+    document.querySelectorAll(".step-indicator").forEach(el => {
+        const paso = parseInt(el.dataset.step);
+        el.classList.toggle("activo", paso === n);
+        el.classList.toggle("completado", paso < n);
+    });
+    document.querySelector("#btn-anterior").style.display = n === 1 ? "none" : "inline-block";
+    document.querySelector("#btn-siguiente").style.display = n === TOTAL_PASOS ? "none" : "inline-block";
+    document.querySelector("#btn-guardar").style.display = n === TOTAL_PASOS ? "inline-block" : "none";
+    pasoActual = n;
+}
+
+document.querySelector("#btn-siguiente").addEventListener("click", () => {
+    if (pasoActual < TOTAL_PASOS) mostrarPaso(pasoActual + 1);
+});
+document.querySelector("#btn-anterior").addEventListener("click", () => {
+    if (pasoActual > 1) mostrarPaso(pasoActual - 1);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    actualizarPorCategoria();
+    // Si Django devolvió errores de validación, abre el primer paso que tenga un error
+    let pasoConError = 1;
+    document.querySelectorAll(".form-step").forEach(el => {
+        if (el.querySelector(".is-invalid, .alert-danger")) {
+            pasoConError = Math.min(pasoConError === 1 ? parseInt(el.dataset.step) : pasoConError, parseInt(el.dataset.step));
+        }
+    });
+    mostrarPaso(pasoConError);
+});
+</script>
+{% endblock %}
