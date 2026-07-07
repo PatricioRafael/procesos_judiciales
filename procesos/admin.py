@@ -63,7 +63,7 @@ class ProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
         "nurej",
         "juzgado",
         "estado_actual",
-        "doctor_responsable",
+        "abogado_responsable",
         "activo",
     )
     list_filter = ("categoria", "estado_actual", "juzgado", "activo")

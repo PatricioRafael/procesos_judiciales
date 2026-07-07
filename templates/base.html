@@ -247,7 +247,7 @@
                 <div class="small lh-sm">
                     <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
                     <div class="text-muted-gadp">
-                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% else %}Doctor{% endif %}
+                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% elif user.perfil.es_secretario %}Secretario{% else %}Abogado{% endif %}
                     </div>
                 </div>
             </div>

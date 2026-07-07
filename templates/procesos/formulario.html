@@ -45,10 +45,17 @@
     .form-step { display: none; }
     .form-step.activo { display: block; }
     .is-invalid { border-color: var(--color-red) !important; }
+    .errorlist { list-style: none; padding: 0; margin: .3rem 0 0; color: var(--color-red); font-size: .82rem; }
+    .errorlist li::before { content: "⚠ "; }
 </style>
 
 <form method="post" enctype="multipart/form-data" novalidate class="card p-4">
     {% csrf_token %}
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> Revisa los campos marcados abajo antes de continuar.
+    </div>
+    {% endif %}
 
     <!-- PASO 1: Detalles del caso -->
     <div class="form-step" data-step="1">
@@ -234,13 +241,13 @@ document.querySelector("#btn-anterior").addEventListener("click", () => {
 document.addEventListener("DOMContentLoaded", () => {
     actualizarPorCategoria();
     // Si Django devolvió errores de validación, abre el primer paso que tenga un error
-    let pasoConError = 1;
+    let pasoConError = null;
     document.querySelectorAll(".form-step").forEach(el => {
-        if (el.querySelector(".is-invalid, .alert-danger")) {
-            pasoConError = Math.min(pasoConError === 1 ? parseInt(el.dataset.step) : pasoConError, parseInt(el.dataset.step));
+        if (pasoConError === null && el.querySelector(".errorlist")) {
+            pasoConError = parseInt(el.dataset.step);
         }
     });
-    mostrarPaso(pasoConError);
+    mostrarPaso(pasoConError || 1);
 });
 </script>
 {% endblock %}

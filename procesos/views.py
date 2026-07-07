@@ -7,7 +7,7 @@ from django.views.generic import FormView
 from catalogos.models import Juzgado, Parte, TipoProceso
 from procesos.forms import ProcesoForm
 from procesos.models import DetalleContrato, HistorialEstado, Proceso, ProcesoParte
-from usuarios.models import es_admin_juridico, es_doctor
+from usuarios.models import es_admin_juridico, es_abogado
 
 
 def _dividir_nombres(texto):
@@ -44,7 +44,7 @@ class ProcesoCreateView(LoginRequiredMixin, FormView):
             juzgado=juzgado,
             estado_actual=datos["estado_actual"],
             fecha_registro=datos.get("fecha_registro"),
-            doctor_responsable=user if es_doctor(user) else None,
+            abogado_responsable=user if es_abogado(user) else None,
         )
 
         # 4. Partes: texto libre separado por comas -> busca o crea cada una
@@ -103,7 +103,7 @@ class ProcesoListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = Proceso.objects.select_related(
-            "categoria", "juzgado", "estado_actual", "doctor_responsable"
+            "categoria", "juzgado", "estado_actual", "abogado_responsable"
         ).order_by("-actualizado_en")
 
         categoria = self.request.GET.get("categoria")
@@ -117,8 +117,8 @@ class ProcesoListView(LoginRequiredMixin, ListView):
             qs = qs.filter(estado_actual_id=estado)
         if q:
             qs = qs.filter(nro_correlativo__icontains=q) | qs.filter(nurej__icontains=q)
-        if mios and es_doctor(self.request.user):
-            qs = qs.filter(doctor_responsable=self.request.user)
+        if mios and es_abogado(self.request.user):
+            qs = qs.filter(abogado_responsable=self.request.user)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -144,7 +144,7 @@ class ProcesoDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         return Proceso.objects.select_related(
-            "categoria", "tipo_proceso", "juzgado", "estado_actual", "doctor_responsable"
+            "categoria", "tipo_proceso", "juzgado", "estado_actual", "abogado_responsable"
         ).prefetch_related("partes__parte", "historial__estado_nuevo", "acciones_futuras", "documentos")
 
     def get_context_data(self, **kwargs):
@@ -152,7 +152,7 @@ class ProcesoDetailView(LoginRequiredMixin, DetailView):
         proceso = self.object
         user = self.request.user
         ctx["puede_editar"] = es_admin_juridico(user) or (
-            es_doctor(user) and proceso.doctor_responsable_id == user.id
+            es_abogado(user) and proceso.abogado_responsable_id == user.id
         )
         return ctx
     
@@ -170,12 +170,12 @@ class PuedeEditarProcesoMixin(UserPassesTestMixin):
         user = self.request.user
         if es_admin_juridico(user):
             return True
-        if es_doctor(user):
-            return proceso.doctor_responsable_id == user.id
+        if es_abogado(user):
+            return proceso.abogado_responsable_id == user.id
         return False
 
     def handle_no_permission(self):
-        raise PermissionDenied("Solo el doctor responsable o el área jurídica pueden editar este proceso.")
+        raise PermissionDenied("Solo el abogado responsable o el área jurídica pueden editar este proceso.")
 
 
 class ProcesoUpdateView(LoginRequiredMixin, PuedeEditarProcesoMixin, UpdateView):

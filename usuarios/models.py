@@ -5,14 +5,14 @@ from django.db import models
 class Perfil(models.Model):
 
     class Rol(models.TextChoices):
-        ADMIN = "ADMIN", "Administrador juridico"
-        DOCTOR = "DOCTOR", "Doctor"
+        ADMIN = "ADMIN", "Administrador jurídico"
+        ABOGADO = "ABOGADO", "Abogado"
+        SECRETARIO = "SECRETARIO", "Secretario"
 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="perfil"
     )
-    rol = models.CharField(max_length=10, choices=Rol.choices, default=Rol.DOCTOR)
-    matricula_profesional = models.CharField(max_length=50, blank=True)
+    rol = models.CharField(max_length=10, choices=Rol.choices, default=Rol.ABOGADO)
     telefono = models.CharField(max_length=30, blank=True)
     activo = models.BooleanField(default=True)
     creado_en = models.DateTimeField(auto_now_add=True)
@@ -29,8 +29,12 @@ class Perfil(models.Model):
         return self.rol == self.Rol.ADMIN
 
     @property
-    def es_doctor(self):
-        return self.rol == self.Rol.DOCTOR
+    def es_abogado(self):
+        return self.rol == self.Rol.ABOGADO
+    
+    @property
+    def es_secretario(self):
+        return self.rol == self.Rol.SECRETARIO
 
 
 def es_superadmin(user):
@@ -45,7 +49,12 @@ def es_admin_juridico(user):
     return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.ADMIN and user.perfil.activo
 
 
-def es_doctor(user):
+def es_abogado(user):
     if not user.is_authenticated:
         return False
-    return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.DOCTOR and user.perfil.activo
+    return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.ABOGADO and user.perfil.activo
+
+def es_secretario(user):
+    if not user.is_authenticated:
+        return False
+    return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.SECRETARIO and user.perfil.activo

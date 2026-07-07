@@ -18,12 +18,17 @@ class Proceso(models.Model):
     juzgado = models.ForeignKey(Juzgado, on_delete=models.PROTECT, related_name="procesos")
     estado_actual = models.ForeignKey(EstadoProceso, on_delete=models.PROTECT, related_name="procesos")
 
-    doctor_responsable = models.ForeignKey(
+    abogado_responsable = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="procesos_asignados",
+    )
+    abogado_referencia = models.CharField(
+        max_length=255, blank=True,
+        help_text="Nombre del profesional a cargo según el registro original (Excel), "
+                   "por si aún no tiene una cuenta de usuario creada en el sistema."
     )
 
     fecha_registro = models.DateField(null=True, blank=True, help_text="Fecha de la demanda/acción, si se conoce")

@@ -1,6 +1,7 @@
 from django import forms
 
 from catalogos.models import Categoria, EstadoProceso
+from procesos.models import HistorialEstado, AccionFutura
 
 
 class ProcesoForm(forms.Form):
@@ -15,6 +16,14 @@ class ProcesoForm(forms.Form):
         queryset=Categoria.objects.all(), label="Categoría del proceso"
     )
     nurej = forms.CharField(label="NUREJ", max_length=50, required=False)
+    def clean_nurej(self):
+        nurej = self.cleaned_data.get("nurej", "").strip()
+        if not nurej:
+            return nurej
+        from procesos.models import Proceso
+        if Proceso.objects.filter(nurej=nurej).exists():
+            raise forms.ValidationError("Ya existe un proceso registrado con este NUREJ.")
+        return nurej
 
     # Texto libre, como en el Excel. La vista hace get_or_create.
     parte_activa = forms.CharField(
