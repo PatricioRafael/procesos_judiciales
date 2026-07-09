@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Gestión Documental{% endblock %}
+{% block page_title %}Gestión de Documentos y Archivos{% endblock %}
+{% block nav_documentos %}active{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr><th>Nombre</th><th>Proceso</th><th>Fecha</th><th>Usuario</th></tr>
+            </thead>
+            <tbody>
+                {% for doc in documentos %}
+                <tr>
+                    <td><i class="bi bi-file-earmark"></i> {{ doc.descripcion|default:doc.archivo.name }}</td>
+                    <td><a href="{% url 'procesos:detalle' doc.proceso.pk %}">{{ doc.proceso.nurej|default:doc.proceso.nro_correlativo }}</a></td>
+                    <td>{{ doc.fecha_subida|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if doc.subido_por %}
+                            {{ doc.subido_por.get_full_name|default:doc.subido_por.username }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-muted-gadp py-4">No hay documentos cargados todavía.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load procesos_extras %}
+{% block title %}Calendario{% endblock %}
+{% block page_title %}Calendario{% endblock %}
+{% block nav_calendario %}active{% endblock %}
+{% block content %}
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <h4 class="mb-0">{{ nombre_mes }} {{ anio }}</h4>
+                <a href="?anio={{ anio_mes_anterior }}&mes={{ mes_anterior }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-left"></i></a>
+                <a href="?" class="btn btn-sm btn-outline-secondary">Hoy</a>
+                <a href="?anio={{ anio_mes_siguiente }}&mes={{ mes_siguiente }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-right"></i></a>
+            </div>
+            {% if not user.perfil.es_secretario %}
+            <a href="{% url 'procesos:agregar_evento' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo Evento</a>
+            {% endif %}
+        </div>
+
+        <div class="card p-3">
+            <table class="table table-borderless mb-0" style="table-layout:fixed;">
+                <thead>
+                    <tr class="text-center text-muted-gadp small">
+                        <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for semana in semanas %}
+                    <tr>
+                        {% for dia in semana %}
+                        <td style="height:90px; vertical-align:top; border:1px solid var(--color-border);" class="p-2">
+                            {% if dia != 0 %}
+                                <div class="small {% if dia == hoy.day and mes == hoy.month and anio == hoy.year %}fw-bold text-danger{% else %}text-muted-gadp{% endif %}">{{ dia }}</div>
+                                {% with eventos=eventos_por_dia|get_item:dia %}
+                                    {% for ev in eventos %}
+                                    <div class="small mt-1 px-1 py-1 rounded"
+                                        style="background:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red-soft){% else %}var(--color-green-soft){% endif %};
+                                               color:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red){% else %}var(--color-green){% endif %};
+                                               font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                        {{ ev.titulo }}
+                                    </div>
+                                    {% endfor %}
+                                {% endwith %}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 mb-3">
+            <h6 class="mb-3">Leyenda</h6>
+            <div class="d-flex align-items-center gap-2 mb-2 small"><span style="width:10px;height:10px;border-radius:50%;background:var(--color-green);display:inline-block;"></span> Audiencias / Recordatorios</div>
+            <div class="d-flex align-items-center gap-2 small"><span style="width:10px;height:10px;border-radius:50%;background:var(--color-red);display:inline-block;"></span> Vencimientos</div>
+        </div>
+        <div class="card p-3">
+            <h6 class="mb-3">Próximos eventos</h6>
+            {% for ev in proximos_eventos %}
+            <div class="mb-3 pb-2 border-bottom">
+                <div class="small text-muted-gadp">{{ ev.fecha|date:"d M" }}{% if ev.hora %}, {{ ev.hora|time:"H:i" }}{% endif %}</div>
+                <div class="fw-semibold small">{{ ev.titulo }}</div>
+                {% if ev.proceso %}<div class="small text-muted-gadp">{{ ev.proceso.nurej|default:ev.proceso.nro_correlativo }}</div>{% endif %}
+            </div>
+            {% empty %}
+            <p class="text-muted-gadp small mb-0">No hay eventos próximos.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

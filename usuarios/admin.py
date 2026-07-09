@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.contrib.auth.models import User
 
-from usuarios.models import Perfil
+from usuarios.models import Perfil, RegistroAuditoria
 
 
 class PerfilInline(admin.StackedInline):
@@ -34,3 +34,19 @@ class UserAdmin(DjangoUserAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+@admin.register(RegistroAuditoria)
+class RegistroAuditoriaAdmin(admin.ModelAdmin):
+    list_display = ("creado_en", "usuario_texto", "accion", "modulo", "ip_address", "estado")
+    list_filter = ("estado", "modulo")
+    search_fields = ("usuario_texto", "accion", "ip_address")
+    readonly_fields = [f.name for f in RegistroAuditoria._meta.fields]
+
+    def has_add_permission(self, request):
+        return False  # los registros solo se crean automáticamente, nunca a mano
+
+    def has_change_permission(self, request, obj=None):
+        return False  # de solo lectura, para no alterar el historial
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser

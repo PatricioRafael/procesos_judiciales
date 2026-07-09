@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block page_title %}Nuevo Evento{% endblock %}
+{% block nav_calendario %}active{% endblock %}
+{% block content %}
+<h3 class="mb-4">Nuevo evento</h3>
+<form method="post" class="card p-4" style="max-width:600px;">
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Guardar evento</button>
+</form>
+{% endblock %}

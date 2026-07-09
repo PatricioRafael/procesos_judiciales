@@ -4,6 +4,7 @@ from procesos.models import (
     AccionFutura,
     DetalleContrato,
     DocumentoProceso,
+    Evento,
     HistorialEstado,
     Proceso,
     ProcesoParte,
@@ -75,3 +76,8 @@ class ProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
 @admin.register(DocumentoProceso)
 class DocumentoProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
     list_display = ("proceso", "descripcion", "subido_por", "fecha_subida")
+
+@admin.register(Evento)
+class EventoAdmin(admin.ModelAdmin):
+    list_display = ("titulo", "tipo", "fecha", "hora", "proceso")
+    list_filter = ("tipo",)

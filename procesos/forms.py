@@ -1,21 +1,44 @@
 from django import forms
 
 from catalogos.models import Categoria, EstadoProceso
-from procesos.models import HistorialEstado, AccionFutura
+from procesos.models import AccionFutura, Evento, HistorialEstado
 
 
-class ProcesoForm(forms.Form):
+class BootstrapFormMixin:
+    """Agrega clases de Bootstrap a los widgets automáticamente."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            css = "form-select" if isinstance(field.widget, (forms.Select, forms.SelectMultiple)) else "form-control"
+            existing = field.widget.attrs.get("class", "")
+            field.widget.attrs["class"] = f"{existing} {css}".strip()
+
+
+class ProcesoForm(BootstrapFormMixin, forms.Form):
     """
-    Formulario "estilo Excel": el doctor escribe los datos con los mismos
-    campos de su hoja de cálculo. Por dentro, la vista se encarga de
-    convertir estos textos libres en registros normalizados (Juzgado,
-    Parte, TipoProceso) sin duplicar los que ya existen.
+    Formulario de una sola página, con exactamente las columnas del
+    documento oficial de procesos judiciales: Demandante, Proyecto/Motivo,
+    Demandado, Juzgado, NUREJ, Estado actual, Profesional a cargo.
     """
 
-    categoria = forms.ModelChoiceField(
-        queryset=Categoria.objects.all(), label="Categoría del proceso"
-    )
+    categoria = forms.ModelChoiceField(queryset=Categoria.objects.all(), label="Categoría del proceso")
+
+    parte_activa = forms.CharField(label="Demandante", max_length=500)
+    proyecto_motivo = forms.CharField(label="Proyecto / Motivo", max_length=500, required=False)
+    parte_pasiva = forms.CharField(label="Demandado", max_length=500, required=False)
+    juzgado = forms.CharField(label="Juzgado", max_length=255)
+
     nurej = forms.CharField(label="NUREJ", max_length=50, required=False)
+
+    estado_actual = forms.ModelChoiceField(queryset=EstadoProceso.objects.all(), label="Estado")
+    estado_actual_texto = forms.CharField(
+        label="Estado actual del proceso", required=False, widget=forms.Textarea(attrs={"rows": 3}),
+        help_text="Descripción tal como se registra en el documento oficial."
+    )
+
+    abogado_referencia = forms.CharField(label="Profesional a cargo", max_length=255, required=False)
+
     def clean_nurej(self):
         nurej = self.cleaned_data.get("nurej", "").strip()
         if not nurej:
@@ -25,58 +48,17 @@ class ProcesoForm(forms.Form):
             raise forms.ValidationError("Ya existe un proceso registrado con este NUREJ.")
         return nurej
 
-    # Texto libre, como en el Excel. La vista hace get_or_create.
-    parte_activa = forms.CharField(
-        label="Demandante", max_length=500,
-        help_text="Si hay varios, sepáralos con coma."
-    )
-    parte_pasiva = forms.CharField(
-        label="Demandado", max_length=500,
-        help_text="Si hay varios, sepáralos con coma."
-    )
-
-    tipo_proceso = forms.CharField(label="Tipo de proceso", max_length=255, required=False)
-    juzgado = forms.CharField(label="Juzgado", max_length=255)
-
-    estado_actual = forms.ModelChoiceField(queryset=EstadoProceso.objects.all(), label="Estado actual")
-    fecha_registro = forms.DateField(
-        label="Fecha de la demanda/acción", required=False,
-        widget=forms.DateInput(attrs={"type": "date"})
-    )
-
-    # Solo se usan si categoria == Contencioso (se muestran/ocultan con JS)
-    proyecto = forms.CharField(label="Proyecto", max_length=500, required=False)
-    nro_contrato = forms.CharField(label="Nº de contrato", max_length=100, required=False)
-    fecha_contrato = forms.DateField(
-        label="Fecha de contrato", required=False,
-        widget=forms.DateInput(attrs={"type": "date"})
-    )
-    motivo_demanda = forms.CharField(
-        label="Motivo de la demanda", required=False, widget=forms.Textarea(attrs={"rows": 3})
-    )
-
-    observacion_inicial = forms.CharField(
-        label="Resumen del estado", required=False, widget=forms.Textarea(attrs={"rows": 3}),
-        help_text="Se guarda como la primera entrada del historial del proceso."
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
-            field.widget.attrs["class"] = css
-
     def clean(self):
         cleaned = super().clean()
         categoria = cleaned.get("categoria")
-        if categoria and categoria.nombre == "Contencioso":
-            if not cleaned.get("nro_contrato") and not cleaned.get("proyecto"):
-                self.add_error("nro_contrato", "Para procesos Contenciosos, indica al menos el proyecto o el contrato.")
-            # En Contencioso el demandado siempre es el GADP; no se pide en el formulario.
-            self.errors.pop("parte_pasiva", None)
+        # En Contencioso el demandado siempre es el GADP, así que no es obligatorio escribirlo.
+        if categoria and categoria.nombre != "Contencioso":
+            if not cleaned.get("parte_pasiva"):
+                self.add_error("parte_pasiva", "Este campo es obligatorio para esta categoría.")
         return cleaned
-    
-class HistorialEstadoForm(forms.ModelForm):
+
+
+class HistorialEstadoForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = HistorialEstado
         fields = ["estado_nuevo", "fecha_modificacion", "observacion"]
@@ -85,14 +67,8 @@ class HistorialEstadoForm(forms.ModelForm):
             "observacion": forms.Textarea(attrs={"rows": 4}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
-            field.widget.attrs["class"] = css
 
-
-class AccionFuturaForm(forms.ModelForm):
+class AccionFuturaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = AccionFutura
         fields = ["descripcion", "fecha_limite", "responsable", "completada"]
@@ -101,8 +77,12 @@ class AccionFuturaForm(forms.ModelForm):
             "descripcion": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
-            field.widget.attrs["class"] = css
+class EventoForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Evento
+        fields = ["titulo", "descripcion", "tipo", "fecha", "hora", "proceso"]
+        widgets = {
+            "fecha": forms.DateInput(attrs={"type": "date"}),
+            "hora": forms.TimeInput(attrs={"type": "time"}),
+            "descripcion": forms.Textarea(attrs={"rows": 2}),
+        }

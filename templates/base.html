@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,6 +18,8 @@
             --color-gold: #c5a059;
             --color-bg: #f9f8f6;
             --color-border: #e5e7eb;
+            --color-green: #1f9d55;
+            --color-green-soft: #eaf6ee;
 
             --bs-body-font-family: 'Outfit', sans-serif;
             --bs-body-bg: var(--color-bg);
@@ -62,11 +65,7 @@
             font-weight: 700;
             flex-shrink: 0;
         }
-        .sidebar-brand h1 {
-            font-size: 1rem;
-            margin: 0;
-            color: var(--color-ink);
-        }
+        .sidebar-brand h1 { font-size: 1rem; margin: 0; color: var(--color-ink); }
         .sidebar-brand small {
             display: block;
             font-size: .68rem;
@@ -92,19 +91,26 @@
             align-items: center;
             gap: .7rem;
             padding: .65rem .75rem;
-            border-radius: .5rem;
+            border-radius: .6rem;
             color: var(--color-ink);
             font-size: .92rem;
             margin-bottom: .2rem;
         }
-        .sidebar-nav a:hover { background: var(--color-red-soft); }
+        .sidebar-nav a:hover { background: var(--color-bg); }
         .sidebar-nav a.active {
-            background: var(--color-red-soft);
-            color: var(--color-red);
+            background: var(--color-ink);
+            color: #fff;
             font-weight: 600;
-            border-left: 3px solid var(--color-red);
         }
         .sidebar-nav a i { font-size: 1.05rem; width: 1.2rem; text-align: center; }
+        .sidebar-nav .nav-section-label {
+            font-size: .68rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--color-gray);
+            font-weight: 600;
+            padding: .9rem .75rem .3rem;
+        }
 
         .sidebar-footer a {
             display: flex; align-items: center; gap: .6rem;
@@ -146,6 +152,12 @@
             border: 1px solid var(--color-border);
             display: flex; align-items: center; justify-content: center;
             color: var(--color-ink);
+            position: relative;
+        }
+        .topbar-icon .dot {
+            position: absolute; top: 8px; right: 9px;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--color-red);
         }
         .avatar-circle {
             width: 38px; height: 38px;
@@ -178,7 +190,6 @@
         a { text-decoration: none; }
         .text-muted-gadp { color: var(--color-gray); }
 
-        /* Tarjetas de métricas del panel */
         .stat-card { border: 1px solid var(--color-border); border-radius: 1rem; padding: 1.1rem 1.3rem; background: #fff; }
         .stat-card .stat-icon {
             width: 38px; height: 38px; border-radius: .6rem;
@@ -193,32 +204,41 @@
 
 <aside class="sidebar">
     <div class="sidebar-brand">
-        <div class="logo-circle">PJ</div>
+        <img src="{% static 'img/logo.jpg' %}" alt="Escudo GADP" style="width:42px;height:42px;object-fit:cover;flex-shrink:0;">
         <div>
-            <h1>GADP</h1>
-            <small>Sistema de Procesos Judiciales</small>
+            <h1>Gobernación de Potosí</h1>
+            <small>Gestión Judicial</small>
         </div>
     </div>
 
     {% if user.is_authenticated %}
+    {% if not user.perfil.es_secretario %}
     <a href="{% url 'procesos:crear' %}" class="btn-nuevo-proceso text-center">
         <i class="bi bi-plus-lg"></i> Nuevo Proceso
     </a>
+    {% endif %}
 
     <nav class="sidebar-nav">
-        <a href="{% url 'procesos:listado' %}" class="{% block nav_panel %}{% endblock %}">
-            <i class="bi bi-grid-1x2"></i> Panel de Control
+        <a href="{% url 'procesos:dashboard' %}" class="{% block nav_dashboard %}{% endblock %}">
+            <i class="bi bi-grid-1x2"></i> Dashboard
         </a>
-        <a href="{% url 'procesos:listado' %}" class="{% block nav_expedientes %}{% endblock %}">
-            <i class="bi bi-folder2-open"></i> Expedientes
+        <a href="{% url 'procesos:listado' %}" class="{% block nav_procesos %}{% endblock %}">
+            <i class="bi bi-briefcase"></i> Procesos
+        </a>
+        <a href="{% url 'procesos:calendario' %}" class="{% block nav_calendario %}{% endblock %}">
+            <i class="bi bi-calendar3"></i> Calendario
+        </a>
+        <a href="{% url 'procesos:documentos' %}" class="{% block nav_documentos %}{% endblock %}">
+            <i class="bi bi-folder2-open"></i> Gestión Documental
         </a>
         <a href="#" class="text-muted-gadp">
-            <i class="bi bi-calendar3"></i> Calendario <small>(próximamente)</small>
-        </a>
-        <a href="#" class="text-muted-gadp">
-            <i class="bi bi-bell"></i> Notificaciones <small>(próximamente)</small>
+            <i class="bi bi-bar-chart"></i> Reportes <small>(próximamente)</small>
         </a>
         {% if user.is_superuser or user.perfil.es_admin_juridico %}
+        <div class="nav-section-label">Administración</div>
+        <a href="{% url 'admin:index' %}">
+            <i class="bi bi-people"></i> Abogados / Usuarios
+        </a>
         <a href="{% url 'admin:index' %}">
             <i class="bi bi-gear"></i> Configuración
         </a>
@@ -226,7 +246,12 @@
     </nav>
 
     <div class="sidebar-footer">
-        <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link p-0 text-decoration-none w-100 text-start" style="color: var(--color-gray); display:flex; align-items:center; gap:.6rem; padding:.5rem .75rem !important; font-size:.9rem;">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
+        </form>
     </div>
     {% endif %}
 </aside>
@@ -236,12 +261,44 @@
     <div class="topbar">
         <h4>{% block page_title %}Panel de Control{% endblock %}</h4>
         <div class="d-flex align-items-center gap-3">
-            <form class="topbar-search" method="get" action="{% url 'procesos:listado' %}">
+            <form method="get" action="{% url 'procesos:listado' %}" class="topbar-search">
                 <i class="bi bi-search"></i>
-                <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por NUREJ o Nombre...">
+                <input type="text" name="q" placeholder="Buscar procesos, NUREJ...">
             </form>
-            <div class="topbar-icon"><i class="bi bi-bell"></i></div>
-            <div class="topbar-icon"><i class="bi bi-question-lg"></i></div>
+
+            <div class="dropdown">
+                <button class="topbar-icon border-0" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-bell"></i>
+                    {% if notificaciones_total %}<span class="dot"></span>{% endif %}
+                </button>
+                <div class="dropdown-menu dropdown-menu-end p-2" style="width:320px; max-height:400px; overflow-y:auto;">
+                    <h6 class="dropdown-header">Notificaciones ({{ notificaciones_total|default:0 }})</h6>
+                    {% for n in notificaciones_lista %}
+                    <a href="{% if n.proceso %}{% url 'procesos:detalle' n.proceso.pk %}{% else %}#{% endif %}" class="dropdown-item small py-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if n.tipo == 'vencido' %}
+                                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                            {% elif n.tipo == 'proximo' %}
+                                <i class="bi bi-clock-fill" style="color:var(--color-gold);"></i>
+                            {% else %}
+                                <i class="bi bi-calendar-event-fill text-success"></i>
+                            {% endif %}
+                            <div>
+                                <div class="fw-semibold">{{ n.texto|truncatechars:40 }}</div>
+                                <div class="text-muted-gadp" style="font-size:.72rem;">{{ n.fecha|date:"d/m/Y" }}{% if n.proceso %} · {{ n.proceso.nurej|default:n.proceso.nro_correlativo }}{% endif %}</div>
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="text-muted-gadp small px-2 py-3 mb-0">No tienes notificaciones pendientes.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button class="topbar-icon border-0" type="button" data-bs-toggle="modal" data-bs-target="#modalAyuda">
+                <i class="bi bi-question-lg"></i>
+            </button>
+
             <div class="d-flex align-items-center gap-2">
                 <div class="avatar-circle">{{ user.first_name|first|upper|default:user.username|first|upper }}</div>
                 <div class="small lh-sm">
@@ -249,6 +306,24 @@
                     <div class="text-muted-gadp">
                         {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% elif user.perfil.es_secretario %}Secretario{% else %}Abogado{% endif %}
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalAyuda" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-question-circle"></i> Ayuda rápida</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body small">
+                    <p><strong>Registrar un proceso:</strong> usa el botón "Nuevo Proceso" en la barra lateral.</p>
+                    <p><strong>Buscar un proceso:</strong> escribe el NUREJ o número en la barra de búsqueda de arriba y presiona Enter.</p>
+                    <p><strong>Editar un proceso:</strong> entra al proceso y usa "Editar datos" (solo si eres el abogado responsable o del área jurídica).</p>
+                    <p><strong>Notificaciones:</strong> la campana muestra tareas vencidas o próximas a vencer (7 días), y eventos del calendario próximos.</p>
+                    <p class="mb-0"><strong>Soporte técnico:</strong> contacta al área de sistemas del GADP.</p>
                 </div>
             </div>
         </div>

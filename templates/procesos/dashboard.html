@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Resumen General{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<p class="text-muted-gadp mb-4">Panorama actual de procesos judiciales del GADP.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Total<br>procesos</span>
+                <div class="stat-icon" style="background:var(--color-red-soft); color:var(--color-red);">
+                    <i class="bi bi-folder2"></i>
+                </div>
+            </div>
+            <div class="stat-value mt-2">{{ total_procesos }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Casos en<br>apelación</span>
+                <div class="stat-icon" style="background:#fdf6e8; color:var(--color-gold);">
+                    <i class="bi bi-bank2"></i>
+                </div>
+            </div>
+            <div class="stat-value mt-2">{{ casos_apelacion }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Tareas<br>pendientes</span>
+                <div class="stat-icon" style="background:var(--color-red-soft); color:var(--color-red);">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+            </div>
+            <div class="stat-value mt-2">{{ tareas_pendientes }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="stat-label">Procesos<br>concluidos</span>
+                <div class="stat-icon" style="background:var(--color-green-soft); color:var(--color-green);">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-value mt-2">{{ procesos_concluidos }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-5">
+        <div class="card p-4 h-100">
+            <h6 class="mb-3"><i class="bi bi-pie-chart"></i> Procesos por Estado</h6>
+            <div class="d-flex align-items-center gap-4">
+                <div style="width:140px;height:140px;border-radius:50%;position:relative;
+                    background: conic-gradient(var(--color-red) 0% {{ pct_activos }}%, var(--color-border) {{ pct_activos }}% 100%);">
+                    <div style="position:absolute;top:18%;left:18%;right:18%;bottom:18%;background:#fff;border-radius:50%;
+                        display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                        <strong style="font-size:1.3rem;">{{ total_procesos }}</strong>
+                        <span class="text-muted-gadp small">Total</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span style="width:10px;height:10px;border-radius:50%;background:var(--color-red);display:inline-block;"></span>
+                        <span class="small">Activos ({{ pct_activos }}%)</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="width:10px;height:10px;border-radius:50%;background:var(--color-border);display:inline-block;"></span>
+                        <span class="small">Concluidos ({{ pct_concluidos }}%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card p-4 h-100">
+            <h6 class="mb-3"><i class="bi bi-bar-chart"></i> Procesos por Categoría</h6>
+            {% for c in categorias_con_total %}
+            <div class="mb-2">
+                <div class="d-flex justify-content-between small mb-1">
+                    <span>{{ c.nombre }}</span>
+                    <span class="text-muted-gadp">{{ c.total_procesos }}</span>
+                </div>
+                <div style="background:var(--color-bg); border-radius:.4rem; height:8px;">
+                    <div style="background:var(--color-red); width:{{ c.porcentaje_barra }}%; height: 8px; border-radius:.4rem;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

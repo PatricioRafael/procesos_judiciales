@@ -146,3 +146,33 @@ class DocumentoProceso(models.Model):
 
     def __str__(self):
         return self.descripcion or self.archivo.name
+    
+class Evento(models.Model):
+    """Audiencias, vencimientos de plazo y recordatorios, opcionalmente
+    ligados a un proceso."""
+
+    class Tipo(models.TextChoices):
+        AUDIENCIA = "AUDIENCIA", "Audiencia"
+        VENCIMIENTO = "VENCIMIENTO", "Vencimiento de plazo"
+        RECORDATORIO = "RECORDATORIO", "Recordatorio"
+
+    titulo = models.CharField(max_length=255)
+    descripcion = models.TextField(blank=True)
+    tipo = models.CharField(max_length=15, choices=Tipo.choices, default=Tipo.RECORDATORIO)
+    fecha = models.DateField()
+    hora = models.TimeField(null=True, blank=True)
+    proceso = models.ForeignKey(
+        Proceso, on_delete=models.CASCADE, related_name="eventos", null=True, blank=True
+    )
+    creado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Evento"
+        verbose_name_plural = "Eventos"
+        ordering = ["fecha", "hora"]
+
+    def __str__(self):
+        return f"{self.titulo} ({self.fecha})"
