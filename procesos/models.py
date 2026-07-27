@@ -25,11 +25,6 @@ class Proceso(models.Model):
         blank=True,
         related_name="procesos_asignados",
     )
-    abogado_referencia = models.CharField(
-        max_length=255, blank=True,
-        help_text="Nombre del profesional a cargo según el registro original (Excel), "
-                   "por si aún no tiene una cuenta de usuario creada en el sistema."
-    )
 
     fecha_registro = models.DateField(null=True, blank=True, help_text="Fecha de la demanda/acción, si se conoce")
     activo = models.BooleanField(default=True)
@@ -55,7 +50,12 @@ class Proceso(models.Model):
     @property
     def partes_pasivas(self):
         return self.partes.filter(rol=ProcesoParte.Rol.PASIVA)
-
+    
+    @property
+    def abogado_a_cargo(self):
+        if self.abogado_responsable:
+            return self.abogado_responsable.get_full_name() or self.abogado_responsable.username
+        return None
 
 class ProcesoParte(models.Model):
 

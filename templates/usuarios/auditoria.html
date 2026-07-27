@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Auditoría de Sistema{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h3 class="mb-1">Auditoría de Sistema</h3>
+        <p class="text-muted-gadp mb-0">Seguimiento detallado de todas las actividades del sistema.</p>
+    </div>
+    <a href="{% url 'usuarios:auditoria_csv' %}" class="btn btn-outline-secondary"><i class="bi bi-download"></i> Exportar CSV</a>
+</div>
+
+<form method="get" class="card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small text-muted-gadp">Usuario</label>
+            <select name="usuario" class="form-select">
+                <option value="">Todos los usuarios</option>
+                {% for u in usuarios %}
+                <option value="{{ u.id }}" {% if request.GET.usuario == u.id|stringformat:"s" %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted-gadp">Tipo de acción</label>
+            <select name="accion" class="form-select">
+                <option value="">Todas las acciones</option>
+                {% for a in acciones_distintas %}
+                <option value="{{ a }}" {% if request.GET.accion == a %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted-gadp">Desde</label>
+            <input type="date" name="desde" value="{{ request.GET.desde }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted-gadp">Hasta</label>
+            <input type="date" name="hasta" value="{{ request.GET.hasta }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+        </div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Fecha / Hora</th><th>Usuario</th><th>Acción</th><th>Módulo</th><th>IP</th><th>Estado</th><th class="text-end">Detalle</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registros %}
+                <tr class="{% if r.estado == 'FALLO' %}table-danger{% endif %}">
+                    <td class="small">{{ r.creado_en|date:"d M Y H:i" }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="avatar-circle" style="width:28px;height:28px;font-size:.7rem;">{{ r.usuario_texto|first|upper }}</div>
+                            {{ r.usuario_texto }}
+                        </div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">{{ r.accion }}</span></td>
+                    <td class="small">{{ r.modulo }}</td>
+                    <td class="small text-muted-gadp">{{ r.ip_address|default:"—" }}</td>
+                    <td>
+                        {% if r.estado == "EXITO" %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-circle-fill text-danger"></i>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#modalDetalle{{ r.id }}">Ver JSON</button>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted-gadp py-4">No hay registros de auditoría todavía.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% for r in registros %}
+<div class="modal fade" id="modalDetalle{{ r.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title">Detalle del registro #{{ r.id }} — {{ r.accion }}</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre class="small mb-0">{{ r.detalle|pprint }}</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% if registros.has_other_pages %}
+<nav class="mt-3">
+    <ul class="pagination justify-content-center">
+        {% if registros.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ registros.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Página {{ registros.number }} de {{ registros.paginator.num_pages }}</span></li>
+        {% if registros.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ registros.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

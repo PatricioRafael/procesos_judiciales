@@ -17,4 +17,6 @@ urlpatterns = [
     path("<int:pk>/editar/", views.ProcesoUpdateView.as_view(), name="editar"),
     path("<int:pk>/historial/nuevo/", views.AgregarHistorialView.as_view(), name="agregar_historial"),
     path("<int:pk>/acciones/nueva/", views.AgregarAccionFuturaView.as_view(), name="agregar_accion"),
+    path("<int:pk>/pdf/", views.exportar_proceso_pdf, name="exportar_proceso_pdf"),
+    path("acciones/<int:pk>/toggle/", views.ToggleAccionFuturaView.as_view(), name="toggle_accion"),
 ]

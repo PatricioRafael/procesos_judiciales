@@ -20,7 +20,8 @@
         </div>
 
         <div class="card p-3">
-            <table class="table table-borderless mb-0" style="table-layout:fixed;">
+            <div class="table-responsive">
+            <table class="table table-borderless mb-0" style="table-layout:fixed; min-width:600px;">
                 <thead>
                     <tr class="text-center text-muted-gadp small">
                         <th>Lun</th><th>Mar</th><th>Mié</th><th>Jue</th><th>Vie</th><th>Sáb</th><th>Dom</th>
@@ -35,9 +36,9 @@
                                 <div class="small {% if dia == hoy.day and mes == hoy.month and anio == hoy.year %}fw-bold text-danger{% else %}text-muted-gadp{% endif %}">{{ dia }}</div>
                                 {% with eventos=eventos_por_dia|get_item:dia %}
                                     {% for ev in eventos %}
-                                    <div class="small mt-1 px-1 py-1 rounded"
-                                        style="background:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red-soft){% else %}var(--color-green-soft){% endif %};
-                                               color:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red){% else %}var(--color-green){% endif %};
+                                    <div class="small mt-1 px-1 py-1 rounded" title="{{ ev.get_tipo_display }}: {{ ev.titulo }}"
+                                        style="background:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red-soft){% elif ev.tipo == 'AUDIENCIA' %}#fdf6e8{% else %}var(--color-green-soft){% endif %};
+                                               color:{% if ev.tipo == 'VENCIMIENTO' %}var(--color-red){% elif ev.tipo == 'AUDIENCIA' %}var(--color-gold){% else %}var(--color-green){% endif %};
                                                font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                                         {{ ev.titulo }}
                                     </div>
@@ -50,14 +51,22 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
     <div class="col-md-3">
         <div class="card p-3 mb-3">
-            <h6 class="mb-3">Leyenda</h6>
-            <div class="d-flex align-items-center gap-2 mb-2 small"><span style="width:10px;height:10px;border-radius:50%;background:var(--color-green);display:inline-block;"></span> Audiencias / Recordatorios</div>
-            <div class="d-flex align-items-center gap-2 small"><span style="width:10px;height:10px;border-radius:50%;background:var(--color-red);display:inline-block;"></span> Vencimientos</div>
+            <h6 class="mb-3">Tipos de evento</h6>
+            <div class="d-flex align-items-center gap-2 mb-2 small">
+                <span style="width:10px;height:10px;border-radius:50%;background:var(--color-gold);display:inline-block;"></span> Audiencia
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2 small">
+                <span style="width:10px;height:10px;border-radius:50%;background:var(--color-red);display:inline-block;"></span> Vencimiento de plazo
+            </div>
+            <div class="d-flex align-items-center gap-2 small">
+                <span style="width:10px;height:10px;border-radius:50%;background:var(--color-green);display:inline-block;"></span> Recordatorio
+            </div>
         </div>
         <div class="card p-3">
             <h6 class="mb-3">Próximos eventos</h6>

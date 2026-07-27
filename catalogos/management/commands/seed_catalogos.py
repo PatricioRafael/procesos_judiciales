@@ -24,6 +24,7 @@ ESTADOS = [
     ("En fase de calificación", False),
     ("Concluido", True),
     ("Archivado", True),
+    ("Otros", False),
 ]
 
 

@@ -22,8 +22,18 @@
             {% endif %}
             {% for field in form %}
             <div class="mb-3">
-                <label class="form-label">{{ field.label }}</label>
-                {{ field }}
+                {% if field.name == "completada" %}
+                    <div class="form-check">
+                        {{ field }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    </div>
+                {% else %}
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.name == "responsable" %}
+                        <div class="form-text">Por defecto, el abogado responsable del proceso. Puedes cambiarlo si vas a delegar esta tarea a otra persona.</div>
+                    {% endif %}
+                {% endif %}
                 {{ field.errors }}
             </div>
             {% endfor %}

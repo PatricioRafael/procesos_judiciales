@@ -7,7 +7,6 @@ class Perfil(models.Model):
     class Rol(models.TextChoices):
         ADMIN = "ADMIN", "Administrador jurídico"
         ABOGADO = "ABOGADO", "Abogado"
-        SECRETARIO = "SECRETARIO", "Secretario"
 
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="perfil"
@@ -31,11 +30,6 @@ class Perfil(models.Model):
     @property
     def es_abogado(self):
         return self.rol == self.Rol.ABOGADO
-    
-    @property
-    def es_secretario(self):
-        return self.rol == self.Rol.SECRETARIO
-
 
 def es_superadmin(user):
     return user.is_authenticated and user.is_superuser
@@ -53,11 +47,6 @@ def es_abogado(user):
     if not user.is_authenticated:
         return False
     return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.ABOGADO and user.perfil.activo
-
-def es_secretario(user):
-    if not user.is_authenticated:
-        return False
-    return hasattr(user, "perfil") and user.perfil.rol == Perfil.Rol.SECRETARIO and user.perfil.activo
 
 class RegistroAuditoria(models.Model):
     class Estado(models.TextChoices):

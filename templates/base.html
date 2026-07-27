@@ -120,6 +120,24 @@
         }
         .sidebar-footer a:hover { color: var(--color-red); }
 
+        /* Botón hamburguesa: solo visible en pantallas chicas */
+        .btn-menu {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--color-ink);
+            padding: 0 .5rem 0 0;
+        }
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            z-index: 1040;
+        }
+        .sidebar-backdrop.visible { display: block; }
+
         /* ============ CONTENIDO PRINCIPAL ============ */
         .main-wrapper { margin-left: var(--sidebar-width); }
 
@@ -198,6 +216,35 @@
         }
         .stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--color-gray); font-weight: 600; }
         .stat-value { font-size: 1.9rem; font-weight: 700; color: var(--color-ink); }
+        /* ============ RESPONSIVE ============ */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .25s ease;
+                z-index: 1050;
+                box-shadow: 0 0 30px rgba(0,0,0,.15);
+            }
+            .sidebar.abierto { transform: translateX(0); }
+
+            .main-wrapper { margin-left: 0; }
+
+            .btn-menu { display: inline-block; }
+
+            .topbar { padding: .75rem 1rem; }
+            .topbar h4 { font-size: 1rem; }
+            .topbar-search { display: none; }
+            .topbar .usuario-datos { display: none; }
+
+            .content-area { padding: 1rem; }
+
+            .stat-value { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 575.98px) {
+            .topbar-icon { width: 34px; height: 34px; }
+            h3 { font-size: 1.25rem; }
+            .btn { font-size: .9rem; }
+        }
     </style>
 </head>
 <body>
@@ -212,11 +259,9 @@
     </div>
 
     {% if user.is_authenticated %}
-    {% if not user.perfil.es_secretario %}
     <a href="{% url 'procesos:crear' %}" class="btn-nuevo-proceso text-center">
         <i class="bi bi-plus-lg"></i> Nuevo Proceso
     </a>
-    {% endif %}
 
     <nav class="sidebar-nav">
         <a href="{% url 'procesos:dashboard' %}" class="{% block nav_dashboard %}{% endblock %}">
@@ -231,16 +276,20 @@
         <a href="{% url 'procesos:documentos' %}" class="{% block nav_documentos %}{% endblock %}">
             <i class="bi bi-folder2-open"></i> Gestión Documental
         </a>
-        <a href="#" class="text-muted-gadp">
-            <i class="bi bi-bar-chart"></i> Reportes <small>(próximamente)</small>
-        </a>
         {% if user.is_superuser or user.perfil.es_admin_juridico %}
         <div class="nav-section-label">Administración</div>
-        <a href="{% url 'admin:index' %}">
-            <i class="bi bi-people"></i> Abogados / Usuarios
+        {% if user.is_superuser %}
+        <a href="{% url 'usuarios:lista' %}" class="{% block nav_usuarios %}{% endblock %}">
+            <i class="bi bi-people"></i> Usuarios
         </a>
-        <a href="{% url 'admin:index' %}">
+        {% endif %}
+        <a href="{% url 'catalogos:lista' 'categorias' %}" class="{% block nav_catalogos %}{% endblock %}">
             <i class="bi bi-gear"></i> Configuración
+        </a>
+        {% endif %}
+        {% if user.is_superuser %}
+        <a href="{% url 'usuarios:auditoria' %}" class="{% block nav_auditoria %}{% endblock %}">
+            <i class="bi bi-clock-history"></i> Historial
         </a>
         {% endif %}
     </nav>
@@ -256,10 +305,15 @@
     {% endif %}
 </aside>
 
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="cerrarSidebar()"></div>
+
 <div class="main-wrapper">
     {% if user.is_authenticated %}
     <div class="topbar">
-        <h4>{% block page_title %}Panel de Control{% endblock %}</h4>
+        <div class="d-flex align-items-center">
+            <button class="btn-menu" type="button" onclick="abrirSidebar()"><i class="bi bi-list"></i></button>
+            <h4 class="mb-0">{% block page_title %}Panel de Control{% endblock %}</h4>
+        </div>
         <div class="d-flex align-items-center gap-3">
             <form method="get" action="{% url 'procesos:listado' %}" class="topbar-search">
                 <i class="bi bi-search"></i>
@@ -267,25 +321,43 @@
             </form>
 
             <div class="dropdown">
-                <button class="topbar-icon border-0" type="button" data-bs-toggle="dropdown">
+                <button class="topbar-icon border-0 position-relative" type="button" data-bs-toggle="dropdown">
                     <i class="bi bi-bell"></i>
-                    {% if notificaciones_total %}<span class="dot"></span>{% endif %}
+                    {% if notificaciones_urgentes %}
+                        <span class="badge rounded-pill position-absolute" style="top:-4px; right:-4px; background:var(--color-red); font-size:.6rem;">{{ notificaciones_urgentes }}</span>
+                    {% elif notificaciones_total %}
+                        <span class="dot"></span>
+                    {% endif %}
                 </button>
-                <div class="dropdown-menu dropdown-menu-end p-2" style="width:320px; max-height:400px; overflow-y:auto;">
-                    <h6 class="dropdown-header">Notificaciones ({{ notificaciones_total|default:0 }})</h6>
+                <div class="dropdown-menu dropdown-menu-end p-2" style="width:340px; max-height:420px; overflow-y:auto;">
+                    <h6 class="dropdown-header">
+                        Notificaciones ({{ notificaciones_total|default:0 }})
+                        {% if notificaciones_urgentes %}
+                            <span class="text-danger">· {{ notificaciones_urgentes }} urgente{{ notificaciones_urgentes|pluralize }}</span>
+                        {% endif %}
+                    </h6>
                     {% for n in notificaciones_lista %}
-                    <a href="{% if n.proceso %}{% url 'procesos:detalle' n.proceso.pk %}{% else %}#{% endif %}" class="dropdown-item small py-2 border-bottom">
-                        <div class="d-flex align-items-center gap-2">
+                    <a href="{% if n.proceso %}{% url 'procesos:detalle' n.proceso.pk %}{% else %}{% url 'procesos:calendario' %}{% endif %}"
+                       class="dropdown-item small py-2 border-bottom"
+                       style="{% if n.tipo == 'vencido' or n.tipo == 'hoy' %}background:var(--color-red-soft);{% endif %}">
+                        <div class="d-flex align-items-start gap-2">
                             {% if n.tipo == 'vencido' %}
-                                <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-                            {% elif n.tipo == 'proximo' %}
-                                <i class="bi bi-clock-fill" style="color:var(--color-gold);"></i>
+                                <i class="bi bi-exclamation-triangle-fill text-danger mt-1"></i>
+                            {% elif n.tipo == 'hoy' %}
+                                <i class="bi bi-alarm-fill text-danger mt-1"></i>
+                            {% elif n.tipo == 'urgente' %}
+                                <i class="bi bi-clock-fill mt-1" style="color:var(--color-gold);"></i>
                             {% else %}
-                                <i class="bi bi-calendar-event-fill text-success"></i>
+                                <i class="bi bi-calendar-event-fill text-success mt-1"></i>
                             {% endif %}
-                            <div>
-                                <div class="fw-semibold">{{ n.texto|truncatechars:40 }}</div>
-                                <div class="text-muted-gadp" style="font-size:.72rem;">{{ n.fecha|date:"d/m/Y" }}{% if n.proceso %} · {{ n.proceso.nurej|default:n.proceso.nro_correlativo }}{% endif %}</div>
+                            <div style="white-space:normal;">
+                                <div class="fw-semibold">{{ n.texto|truncatechars:45 }}</div>
+                                <div class="{% if n.tipo == 'vencido' or n.tipo == 'hoy' %}text-danger fw-semibold{% else %}text-muted-gadp{% endif %}" style="font-size:.72rem;">
+                                    {{ n.urgencia_texto }}
+                                </div>
+                                <div class="text-muted-gadp" style="font-size:.7rem;">
+                                    {{ n.categoria }} · {{ n.fecha|date:"d/m/Y" }}{% if n.proceso %} · {{ n.proceso.nurej|default:n.proceso.nro_correlativo }}{% endif %}
+                                </div>
                             </div>
                         </div>
                     </a>
@@ -301,15 +373,16 @@
 
             <div class="d-flex align-items-center gap-2">
                 <div class="avatar-circle">{{ user.first_name|first|upper|default:user.username|first|upper }}</div>
-                <div class="small lh-sm">
+                <div class="small lh-sm usuario-datos">
                     <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
                     <div class="text-muted-gadp">
-                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% elif user.perfil.es_secretario %}Secretario{% else %}Abogado{% endif %}
+                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% else %}Abogado{% endif %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 
     <div class="modal fade" id="modalAyuda" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
@@ -323,12 +396,10 @@
                     <p><strong>Buscar un proceso:</strong> escribe el NUREJ o número en la barra de búsqueda de arriba y presiona Enter.</p>
                     <p><strong>Editar un proceso:</strong> entra al proceso y usa "Editar datos" (solo si eres el abogado responsable o del área jurídica).</p>
                     <p><strong>Notificaciones:</strong> la campana muestra tareas vencidas o próximas a vencer (7 días), y eventos del calendario próximos.</p>
-                    <p class="mb-0"><strong>Soporte técnico:</strong> contacta al área de sistemas del GADP.</p>
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
 
     <div class="content-area">
         {% for message in messages %}
@@ -339,6 +410,18 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function abrirSidebar() {
+    document.querySelector(".sidebar").classList.add("abierto");
+    document.querySelector("#sidebarBackdrop").classList.add("visible");
+}
+function cerrarSidebar() {
+    document.querySelector(".sidebar").classList.remove("abierto");
+    document.querySelector("#sidebarBackdrop").classList.remove("visible");
+}
+// Al hacer clic en cualquier enlace del menú, se cierra solo
+document.querySelectorAll(".sidebar a").forEach(a => a.addEventListener("click", cerrarSidebar));
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

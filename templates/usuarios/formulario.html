@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{% if modo == "crear" %}Nuevo Usuario{% else %}Editar Usuario{% endif %}{% endblock %}
+{% block page_title %}Configuración{% endblock %}
+{% block content %}
+
+<a href="{% url 'usuarios:lista' %}" class="text-muted-gadp small d-inline-block mb-3">
+    <i class="bi bi-arrow-left"></i> Volver a Usuarios
+</a>
+
+<h3 class="mb-4">{% if modo == "crear" %}Nuevo usuario{% else %}Editar: {{ usuario_editado.get_full_name|default:usuario_editado.username }}{% endif %}</h3>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form method="post" class="card p-4">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Revisa los campos marcados.</div>
+            {% endif %}
+            {% for field in form %}
+            <div class="mb-3">
+                {% if field.widget_type == "checkbox" %}
+                    <div class="form-check">
+                        {{ field }}
+                        <label class="form-check-label">{{ field.label }}</label>
+                    </div>
+                {% else %}
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                {% endif %}
+                {{ field.errors }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
