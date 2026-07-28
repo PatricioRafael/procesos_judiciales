@@ -1,23 +1,8 @@
 from django import forms
 
 from catalogos.models import Categoria, EstadoProceso
+from common.mixins import BootstrapFormMixin
 from procesos.models import AccionFutura, Evento, HistorialEstado
-
-
-class BootstrapFormMixin:
-    """Agrega clases de Bootstrap a los widgets automáticamente."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            if isinstance(field.widget, forms.CheckboxInput):
-                css = "form-check-input"
-            elif isinstance(field.widget, (forms.Select, forms.SelectMultiple)):
-                css = "form-select"
-            else:
-                css = "form-control"
-            existing = field.widget.attrs.get("class", "")
-            field.widget.attrs["class"] = f"{existing} {css}".strip()
 
 
 class ProcesoForm(BootstrapFormMixin, forms.Form):
@@ -137,11 +122,6 @@ class HistorialEstadoForm(BootstrapFormMixin, forms.ModelForm):
 
         return normalizar_mayusculas(self.cleaned_data.get("observacion", ""))
 
-    def clean_descripcion(self):
-        from catalogos.utils import normalizar_mayusculas
-
-        return normalizar_mayusculas(self.cleaned_data.get("descripcion", ""))
-
 
 class AccionFuturaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
@@ -152,15 +132,11 @@ class AccionFuturaForm(BootstrapFormMixin, forms.ModelForm):
             "descripcion": forms.Textarea(attrs={"rows": 3}),
         }
 
-    def clean_observacion(self):
-        from catalogos.utils import normalizar_mayusculas
-
-        return normalizar_mayusculas(self.cleaned_data.get("observacion", ""))
-
     def clean_descripcion(self):
         from catalogos.utils import normalizar_mayusculas
 
         return normalizar_mayusculas(self.cleaned_data.get("descripcion", ""))
+
 
 class EventoForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:

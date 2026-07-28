@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 
@@ -29,7 +30,6 @@ class CatalogoListView(LoginRequiredMixin, SoloAdminJuridicoMixin, View):
     def get(self, request, slug):
         config = CATALOGOS.get(slug)
         if not config:
-            from django.http import Http404
             raise Http404
         qs = config["model"].objects.all()
         if config["select_related"]:

@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from common.mixins import JuridicoAdminPermissionMixin
 from procesos.models import (
     AccionFutura,
     DetalleContrato,
@@ -9,28 +10,6 @@ from procesos.models import (
     Proceso,
     ProcesoParte,
 )
-
-
-class SoloAdminJuridicoMixin:
-    """El módulo de procesos en el admin de Django es para el área
-    jurídica (admin) y el superadmin. Los doctores usan las vistas propias."""
-
-    def has_module_permission(self, request):
-        return request.user.is_superuser or (
-            hasattr(request.user, "perfil") and request.user.perfil.es_admin_juridico
-        )
-
-    def has_view_permission(self, request, obj=None):
-        return self.has_module_permission(request)
-
-    def has_add_permission(self, request):
-        return self.has_module_permission(request)
-
-    def has_change_permission(self, request, obj=None):
-        return self.has_module_permission(request)
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_superuser
 
 
 class ProcesoParteInline(admin.TabularInline):
@@ -57,7 +36,7 @@ class AccionFuturaInline(admin.TabularInline):
 
 
 @admin.register(Proceso)
-class ProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
+class ProcesoAdmin(JuridicoAdminPermissionMixin, admin.ModelAdmin):
     list_display = (
         "nro_correlativo",
         "categoria",
@@ -74,7 +53,7 @@ class ProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
 
 
 @admin.register(DocumentoProceso)
-class DocumentoProcesoAdmin(SoloAdminJuridicoMixin, admin.ModelAdmin):
+class DocumentoProcesoAdmin(JuridicoAdminPermissionMixin, admin.ModelAdmin):
     list_display = ("proceso", "descripcion", "subido_por", "fecha_subida")
 
 @admin.register(Evento)

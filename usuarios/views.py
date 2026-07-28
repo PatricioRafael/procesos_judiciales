@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 
@@ -114,7 +115,8 @@ class ToggleActivoView(SoloSuperadminMixin, View):
         user.save(update_fields=["is_active"])
         messages.success(request, f"Usuario {user.username} {'activado' if user.is_active else 'desactivado'}.")
         return redirect("usuarios:lista")
-    
+
+
 class AuditoriaListView(SoloSuperadminMixin, View):
     def get(self, request):
         qs = RegistroAuditoria.objects.select_related("usuario").all()
@@ -158,8 +160,6 @@ def exportar_auditoria_csv(request):
     for r in RegistroAuditoria.objects.all():
         writer.writerow([r.creado_en.strftime("%d/%m/%Y %H:%M"), r.usuario_texto, r.accion, r.modulo, r.ip_address or "", r.estado, r.detalle])
     return response
-
-from django.contrib.auth.views import LoginView
 
 
 class LoginPersonalizadoView(LoginView):

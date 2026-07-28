@@ -31,10 +31,6 @@ class Perfil(models.Model):
     def es_abogado(self):
         return self.rol == self.Rol.ABOGADO
 
-def es_superadmin(user):
-    return user.is_authenticated and user.is_superuser
-
-
 def es_admin_juridico(user):
     if not user.is_authenticated:
         return False

@@ -4,18 +4,13 @@ from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import CreateView, DetailView, FormView, ListView, TemplateView, UpdateView, View
 from django.db.models import Count
-from django.views.generic import TemplateView
-from django import forms
 
 from catalogos.models import Categoria, EstadoProceso, Juzgado, Parte, TipoProceso
 from catalogos.utils import obtener_o_crear_juzgado, obtener_o_crear_parte, obtener_o_crear_tipo_proceso
+from common.mixins import aplicar_clases_bootstrap
 from procesos.forms import AccionFuturaForm, EventoForm, HistorialEstadoForm, ProcesoForm
 from procesos.models import DetalleContrato, DocumentoProceso, Evento, HistorialEstado, Proceso, ProcesoParte
 from usuarios.models import es_admin_juridico, es_abogado
-
-def _dividir_nombres(texto):
-    """'Juan Pérez, María Gómez' -> ['Juan Pérez', 'María Gómez']"""
-    return [n.strip() for n in texto.split(",") if n.strip()]
 
 
 class ProcesoCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
@@ -125,10 +120,7 @@ class ProcesoCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
         messages.success(self.request, f"Proceso Nº {proceso.nro_correlativo} registrado correctamente.")
         return redirect(proceso.get_absolute_url())
-    
-from django.views.generic import DetailView, ListView
 
-from catalogos.models import Categoria, EstadoProceso
 
 def _filtrar_procesos(request):
     qs = Proceso.objects.select_related(
@@ -156,6 +148,7 @@ def _filtrar_procesos(request):
         qs = qs.filter(abogado_responsable=request.user)
     return qs
 
+
 class ProcesoListView(LoginRequiredMixin, ListView):
     model = Proceso
     template_name = "procesos/listado.html"
@@ -169,11 +162,6 @@ class ProcesoListView(LoginRequiredMixin, ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["categorias"] = Categoria.objects.all()
         ctx["estados"] = EstadoProceso.objects.all()
-
-        todos = Proceso.objects.all()
-
-        from procesos.models import AccionFutura
-
         return ctx
 
 
@@ -270,13 +258,6 @@ class ProcesoDetailView(LoginRequiredMixin, DetailView):
 
         items.sort(key=lambda x: x["fecha"], reverse=True)
         return items
-    
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404
-from django.views.generic import CreateView, UpdateView
-
-from procesos.forms import AccionFuturaForm, HistorialEstadoForm
 
 
 class PuedeEditarProcesoMixin(UserPassesTestMixin):
@@ -300,11 +281,7 @@ class ProcesoUpdateView(LoginRequiredMixin, PuedeEditarProcesoMixin, UpdateView)
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        for field in form.fields.values():
-            css = "form-select" if hasattr(field.widget, "choices") else "form-control"
-            if field.widget.input_type == "checkbox":
-                css = "form-check-input"
-            field.widget.attrs["class"] = css
+        aplicar_clases_bootstrap(form)
         return form
 
     def form_valid(self, form):
@@ -345,7 +322,7 @@ class AgregarAccionFuturaView(LoginRequiredMixin, PuedeEditarProcesoMixin, Creat
 
     def get_object(self):
         return get_object_or_404(Proceso, pk=self.kwargs["pk"])
-    
+
     def get_initial(self):
         initial = super().get_initial()
         proceso = self.get_object()
@@ -365,7 +342,8 @@ class AgregarAccionFuturaView(LoginRequiredMixin, PuedeEditarProcesoMixin, Creat
         accion.save()
         messages.success(self.request, "Acción futura registrada.")
         return redirect(proceso.get_absolute_url())
-    
+
+
 class ProcesoDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "procesos/dashboard.html"
 
@@ -431,7 +409,6 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         import calendar as cal_module
         from datetime import date
-        from procesos.models import Evento
 
         ctx = super().get_context_data(**kwargs)
         hoy = date.today()
@@ -485,11 +462,11 @@ class DocumentosGlobalView(LoginRequiredMixin, TemplateView):
     template_name = "procesos/documentos.html"
 
     def get_context_data(self, **kwargs):
-        from procesos.models import DocumentoProceso
         ctx = super().get_context_data(**kwargs)
         ctx["documentos"] = DocumentoProceso.objects.select_related("proceso", "subido_por").order_by("-fecha_subida")[:50]
         return ctx
-    
+
+
 def exportar_excel(request):
     import openpyxl
     from django.http import HttpResponse
@@ -571,7 +548,8 @@ def exportar_pdf(request):
     elementos.append(tabla)
     doc.build(elementos)
     return response
-    
+
+
 def exportar_proceso_pdf(request, pk):
     from django.http import HttpResponse
     from reportlab.lib import colors
@@ -647,6 +625,7 @@ def exportar_proceso_pdf(request, pk):
 
     doc.build(elementos)
     return response
+
 
 class ToggleAccionFuturaView(LoginRequiredMixin, View):
     def post(self, request, pk):

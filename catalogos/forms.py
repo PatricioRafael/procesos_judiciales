@@ -2,16 +2,7 @@ from django import forms
 
 from catalogos.models import Categoria, EstadoProceso, Juzgado, Parte, TipoProceso
 from catalogos.utils import normalizar_mayusculas
-
-
-class BootstrapFormMixin:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, (forms.Select, forms.SelectMultiple)) else "form-control"
-            if isinstance(field.widget, forms.CheckboxInput):
-                css = "form-check-input"
-            field.widget.attrs["class"] = css
+from common.mixins import BootstrapFormMixin
 
 
 class CategoriaForm(BootstrapFormMixin, forms.ModelForm):

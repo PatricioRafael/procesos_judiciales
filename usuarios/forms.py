@@ -1,17 +1,8 @@
 from django import forms
 from django.contrib.auth.models import User
 
+from common.mixins import BootstrapFormMixin
 from usuarios.models import Perfil
-
-
-class BootstrapFormMixin:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            css = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
-            if isinstance(field.widget, forms.CheckboxInput):
-                css = "form-check-input"
-            field.widget.attrs["class"] = css
 
 
 class UsuarioCreateForm(BootstrapFormMixin, forms.Form):
