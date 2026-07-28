@@ -21,7 +21,7 @@ class UsuarioResumenSerializer(serializers.ModelSerializer):
 class CategoriaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Categoria
-        fields = ["id", "nombre", "slug", "orden"]
+        fields = ["id", "nombre", "orden"]
 
 
 class TipoProcesoSerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class EstadoProcesoSerializer(serializers.ModelSerializer):
 class ParteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parte
-        fields = ["id", "nombre", "tipo_persona", "nro_documento"]
+        fields = ["id", "nombre", "tipo_persona"]
 
 
 class ProcesoParteSerializer(serializers.ModelSerializer):

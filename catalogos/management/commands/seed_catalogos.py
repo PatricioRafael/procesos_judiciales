@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
 
 from catalogos.models import Categoria, EstadoProceso
 
@@ -34,7 +33,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for orden, nombre in enumerate(CATEGORIAS):
             obj, creado = Categoria.objects.get_or_create(
-                nombre=nombre, defaults={"slug": slugify(nombre), "orden": orden}
+                nombre=nombre, defaults={"orden": orden}
             )
             self.stdout.write(("Creada" if creado else "Ya existía") + f": categoría {obj}")
 

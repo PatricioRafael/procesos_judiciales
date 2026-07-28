@@ -139,7 +139,8 @@ def _filtrar_procesos(request):
     estado = request.GET.get("estado")
     q = request.GET.get("q")
     mios = request.GET.get("mios")
-    fecha = request.GET.get("fecha")
+    fecha_desde = request.GET.get("fecha_desde")
+    fecha_hasta = request.GET.get("fecha_hasta")
 
     if categoria:
         qs = qs.filter(categoria_id=categoria)
@@ -147,8 +148,10 @@ def _filtrar_procesos(request):
         qs = qs.filter(estado_actual_id=estado)
     if q:
         qs = qs.filter(nro_correlativo__icontains=q) | qs.filter(nurej__icontains=q)
-    if fecha:
-        qs = qs.filter(fecha_registro=fecha)
+    if fecha_desde:
+        qs = qs.filter(fecha_registro__gte=fecha_desde)
+    if fecha_hasta:
+        qs = qs.filter(fecha_registro__lte=fecha_hasta)
     if mios and es_abogado(request.user):
         qs = qs.filter(abogado_responsable=request.user)
     return qs
@@ -448,10 +451,15 @@ class CalendarioView(LoginRequiredMixin, TemplateView):
         mes_siguiente = mes + 1 if mes < 12 else 1
         anio_mes_siguiente = anio if mes < 12 else anio + 1
 
+        MESES_ES = [
+            "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+        ]
+
         ctx.update({
             "semanas": semanas,
             "eventos_por_dia": eventos_por_dia,
-            "nombre_mes": cal_module.month_name[mes].capitalize(),
+            "nombre_mes": MESES_ES[mes],
             "anio": anio, "mes": mes, "hoy": hoy,
             "mes_anterior": mes_anterior, "anio_mes_anterior": anio_mes_anterior,
             "mes_siguiente": mes_siguiente, "anio_mes_siguiente": anio_mes_siguiente,

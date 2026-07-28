@@ -4,7 +4,6 @@ from django.db import models
 class Categoria(models.Model):
 
     nombre = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
     orden = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -74,7 +73,6 @@ class Parte(models.Model):
 
     nombre = models.CharField(max_length=500)
     tipo_persona = models.CharField(max_length=10, choices=TipoPersona.choices, default=TipoPersona.NATURAL)
-    nro_documento = models.CharField(max_length=50, blank=True, help_text="CI o NIT, si se conoce")
 
     class Meta:
         verbose_name = "Parte procesal"

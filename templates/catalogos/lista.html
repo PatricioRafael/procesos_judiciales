@@ -38,7 +38,7 @@
                         {% if slug == "tipos-proceso" %}{{ obj.categoria.nombre }}
                         {% elif slug == "juzgados" %}{{ obj.get_tipo_display }}
                         {% elif slug == "estados" %}{% if obj.es_final %}Estado final{% else %}En curso{% endif %}
-                        {% elif slug == "partes" %}{{ obj.get_tipo_persona_display }} · {{ obj.nro_documento|default:"—" }}
+                        {% elif slug == "partes" %}{{ obj.get_tipo_persona_display }}
                         {% else %}—{% endif %}
                     </td>
                     <td class="text-end">

@@ -25,8 +25,7 @@ class CatalogoAdminMixin:
 
 @admin.register(Categoria)
 class CategoriaAdmin(CatalogoAdminMixin, admin.ModelAdmin):
-    list_display = ("nombre", "slug", "orden")
-    prepopulated_fields = {"slug": ("nombre",)}
+    list_display = ("nombre", "orden")
 
 
 @admin.register(TipoProceso)
@@ -50,5 +49,5 @@ class EstadoProcesoAdmin(CatalogoAdminMixin, admin.ModelAdmin):
 
 @admin.register(Parte)
 class ParteAdmin(CatalogoAdminMixin, admin.ModelAdmin):
-    list_display = ("nombre", "tipo_persona", "nro_documento")
-    search_fields = ("nombre", "nro_documento")
+    list_display = ("nombre", "tipo_persona")
+    search_fields = ("nombre",)

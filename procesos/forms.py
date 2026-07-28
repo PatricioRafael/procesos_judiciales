@@ -91,13 +91,20 @@ class ProcesoForm(BootstrapFormMixin, forms.Form):
         return nombres[0] if nombres else ""
 
     def clean_nurej(self):
-        nurej = self.cleaned_data.get("nurej", "").strip()
+        from catalogos.utils import normalizar_mayusculas
+
+        nurej = normalizar_mayusculas(self.cleaned_data.get("nurej", ""))
         if not nurej:
             return nurej
         from procesos.models import Proceso
-        if Proceso.objects.filter(nurej=nurej).exists():
+        if Proceso.objects.filter(nurej__iexact=nurej).exists():
             raise forms.ValidationError("Ya existe un proceso registrado con este NUREJ.")
         return nurej
+
+    def clean_estado_actual_texto(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("estado_actual_texto", ""))
 
     def clean_fecha_registro(self):
         from datetime import date
@@ -125,6 +132,16 @@ class HistorialEstadoForm(BootstrapFormMixin, forms.ModelForm):
             "observacion": forms.Textarea(attrs={"rows": 4}),
         }
 
+    def clean_observacion(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("observacion", ""))
+
+    def clean_descripcion(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("descripcion", ""))
+
 
 class AccionFuturaForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
@@ -135,6 +152,16 @@ class AccionFuturaForm(BootstrapFormMixin, forms.ModelForm):
             "descripcion": forms.Textarea(attrs={"rows": 3}),
         }
 
+    def clean_observacion(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("observacion", ""))
+
+    def clean_descripcion(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("descripcion", ""))
+
 class EventoForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Evento
@@ -144,3 +171,13 @@ class EventoForm(BootstrapFormMixin, forms.ModelForm):
             "hora": forms.TimeInput(attrs={"type": "time"}),
             "descripcion": forms.Textarea(attrs={"rows": 2}),
         }
+
+    def clean_titulo(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("titulo", ""))
+
+    def clean_descripcion(self):
+        from catalogos.utils import normalizar_mayusculas
+
+        return normalizar_mayusculas(self.cleaned_data.get("descripcion", ""))

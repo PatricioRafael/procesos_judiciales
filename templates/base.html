@@ -201,8 +201,15 @@
         .badge-estado-activo { background-color: var(--color-red-soft); color: var(--color-red); }
         .badge-estado-final { background-color: var(--color-border); color: var(--color-gray); }
 
-        .table thead { background-color: var(--color-ink); }
-        .table thead th { color: #fff; font-weight: 500; border: none; }
+        .table > thead > tr > th {
+            background-color: var(--color-red) !important;
+            --bs-table-bg: var(--color-red);
+            --bs-table-color: #fff;
+            color: #fff !important;
+            font-weight: 500;
+            border: none;
+            vertical-align: middle;
+        }
         .table-hover tbody tr:hover { background-color: var(--color-red-soft); }
 
         a { text-decoration: none; }

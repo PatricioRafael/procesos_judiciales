@@ -4,12 +4,12 @@
 {% block nav_procesos %}active{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-start mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
     <div>
         <h3 class="mb-1">Listado de Procesos Judiciales</h3>
         <p class="text-muted-gadp mb-0">Gestión y seguimiento de expedientes legales activos e inactivos.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-shrink-0">
         <a href="{% url 'procesos:exportar_pdf' %}?{{ request.GET.urlencode }}" target="_blank" class="btn btn-outline-secondary">
             <i class="bi bi-file-earmark-pdf"></i> PDF
         </a>
@@ -25,15 +25,15 @@
 </div>
 
 <form method="get" class="card p-3 mb-4">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-3">
+    <div class="row g-3">
+        <div class="col-md-4">
             <label class="form-label small text-muted-gadp">Buscar proceso</label>
             <div class="input-group">
                 <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                 <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="NUREJ o Nº...">
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label class="form-label small text-muted-gadp">Categoría</label>
             <select name="categoria" class="form-select">
                 <option value="">Todas</option>
@@ -42,7 +42,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-4">
             <label class="form-label small text-muted-gadp">Estado</label>
             <select name="estado" class="form-select">
                 <option value="">Todos</option>
@@ -51,18 +51,32 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-2">
-            <label class="form-label small text-muted-gadp">Fecha de registro</label>
-            <input type="date" name="fecha" value="{{ request.GET.fecha }}" class="form-control">
-        </div>
-        <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel"></i> Filtrar</button>
-            <a href="{% url 'procesos:listado' %}" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="bi bi-x-lg"></i></a>
-        </div>
     </div>
-    <div class="form-check mt-2">
-        <input class="form-check-input" type="checkbox" name="mios" value="1" id="mios" {% if request.GET.mios %}checked{% endif %} onchange="this.form.submit()">
-        <label class="form-check-label small" for="mios">Solo mis procesos</label>
+
+    <div class="row g-3 mt-1 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small text-muted-gadp">Rango de fechas</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-calendar3"></i></span>
+                <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango..." readonly
+                       style="background:#fff; cursor:pointer;">
+                <button type="button" class="btn btn-outline-secondary" onclick="limpiarRango()" title="Quitar filtro de fechas">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <input type="hidden" name="fecha_desde" id="fechaDesde" value="{{ request.GET.fecha_desde }}">
+            <input type="hidden" name="fecha_hasta" id="fechaHasta" value="{{ request.GET.fecha_hasta }}">
+        </div>
+        <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="mios" value="1" id="mios" {% if request.GET.mios %}checked{% endif %}>
+                <label class="form-check-label small" for="mios">Solo mis procesos</label>
+            </div>
+        </div>
+        <div class="col-md-5 d-flex gap-2 justify-content-end">
+            <button type="submit" class="btn btn-primary px-4"><i class="bi bi-funnel"></i> Filtrar</button>
+            <a href="{% url 'procesos:listado' %}" class="btn btn-outline-secondary" title="Limpiar todos los filtros"><i class="bi bi-arrow-counterclockwise"></i></a>
+        </div>
     </div>
 </form>
 
@@ -127,4 +141,54 @@
     </ul>
 </nav>
 {% endif %}
+{% endblock %}
+{% block extra_js %}
+<style>
+    .litepicker { max-width: 100vw; }
+    @media (max-width: 767px) {
+        .litepicker .container__months { width: auto !important; }
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+<script>
+const inputRango = document.querySelector("#rangoFechas");
+const inputDesde = document.querySelector("#fechaDesde");
+const inputHasta = document.querySelector("#fechaHasta");
+
+// Si ya venía un rango aplicado, se muestra en el campo
+if (inputDesde.value && inputHasta.value) {
+    inputRango.value = `${formatear(inputDesde.value)} — ${formatear(inputHasta.value)}`;
+}
+
+function formatear(iso) {
+    const [a, m, d] = iso.split("-");
+    return `${d}/${m}/${a}`;
+}
+
+const esMovil = window.matchMedia("(max-width: 767px)").matches;
+
+new Litepicker({
+    element: inputRango,
+    singleMode: false,
+    format: "DD/MM/YYYY",
+    lang: "es-ES",
+    numberOfMonths: esMovil ? 1 : 2,
+    numberOfColumns: esMovil ? 1 : 2,
+    startDate: inputDesde.value || null,
+    endDate: inputHasta.value || null,
+    setup: (picker) => {
+        picker.on("selected", (desde, hasta) => {
+            inputDesde.value = desde.format("YYYY-MM-DD");
+            inputHasta.value = hasta.format("YYYY-MM-DD");
+            inputRango.value = `${desde.format("DD/MM/YYYY")} — ${hasta.format("DD/MM/YYYY")}`;
+        });
+    },
+});
+
+function limpiarRango() {
+    inputDesde.value = "";
+    inputHasta.value = "";
+    inputRango.value = "";
+}
+</script>
 {% endblock %}

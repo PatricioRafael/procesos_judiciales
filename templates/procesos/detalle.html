@@ -8,7 +8,7 @@
     <i class="bi bi-arrow-left"></i> Volver a Procesos
 </a>
 
-<div class="d-flex justify-content-between align-items-start mb-4">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
     <div>
         <span class="text-muted-gadp small text-uppercase" style="letter-spacing:.08em;">{{ proceso.categoria.nombre }} · Nº {{ proceso.nro_correlativo }}</span>
         <h3 class="mb-1">Expediente {{ proceso.nurej|default:"sin NUREJ asignado" }}</h3>
@@ -18,30 +18,30 @@
             {% endwith %}
         </p>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{% url 'procesos:exportar_proceso_pdf' proceso.pk %}" target="_blank" class="btn btn-outline-secondary">
+    <div class="d-flex gap-2 flex-shrink-0">
+        <a href="{% url 'procesos:exportar_proceso_pdf' proceso.pk %}" target="_blank" class="btn btn-outline-secondary text-nowrap">
             <i class="bi bi-printer"></i> Imprimir
         </a>
         {% if puede_editar %}
-        <a href="{% url 'procesos:agregar_historial' proceso.pk %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nueva Actuación</a>
+        <a href="{% url 'procesos:agregar_historial' proceso.pk %}" class="btn btn-primary text-nowrap"><i class="bi bi-plus-lg"></i> Nueva Actuación</a>
         {% endif %}
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-8">
-        <ul class="nav nav-tabs mb-3" id="tabsDetalle" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-general" type="button">Datos generales</button>
+<div class="row g-3">
+    <div class="col-lg-8">
+        <ul class="nav nav-tabs mb-3 flex-nowrap overflow-auto" id="tabsDetalle" role="tablist" style="scrollbar-width:thin;">
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link active text-nowrap" data-bs-toggle="tab" data-bs-target="#tab-general" type="button">Datos generales</button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-historial" type="button">Historial</button>
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link text-nowrap" data-bs-toggle="tab" data-bs-target="#tab-historial" type="button">Historial</button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-acciones" type="button">Acciones Futuras</button>
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link text-nowrap" data-bs-toggle="tab" data-bs-target="#tab-acciones" type="button">Acciones Futuras</button>
             </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-documentos" type="button">Documentos</button>
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link text-nowrap" data-bs-toggle="tab" data-bs-target="#tab-documentos" type="button">Documentos</button>
             </li>
         </ul>
 
@@ -51,7 +51,10 @@
                     <h6 class="mb-3">Partes procesales</h6>
                     <ul class="list-group list-group-flush mb-3">
                         {% for pp in proceso.partes.all %}
-                            <li class="list-group-item"><strong>{{ pp.get_rol_display }}:</strong> {{ pp.parte.nombre }}</li>
+                            <li class="list-group-item">
+                                <div class="text-muted-gadp text-uppercase" style="letter-spacing:.06em; font-size:.7rem;">{{ pp.get_rol_display }}</div>
+                                {{ pp.parte.nombre }}
+                            </li>
                         {% empty %}
                             <li class="list-group-item text-muted-gadp">Sin partes registradas</li>
                         {% endfor %}
@@ -65,7 +68,7 @@
                     {% endif %}
 
                     {% if proceso.tipo_proceso %}
-                    <p class="small"><strong>Tipo de proceso:</strong> {{ proceso.tipo_proceso.nombre }}</p>
+                    <p class="small mb-0"><strong>Tipo de proceso:</strong> {{ proceso.tipo_proceso.nombre }}</p>
                     {% endif %}
                 </div>
             </div>
@@ -75,9 +78,9 @@
                     <ul class="list-group list-group-flush">
                         {% for item in linea_tiempo %}
                         <li class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-1">
                                 <div class="d-flex gap-2">
-                                    <i class="bi {{ item.icono }}" style="color:{{ item.color }};"></i>
+                                    <i class="bi {{ item.icono }} flex-shrink-0" style="color:{{ item.color }};"></i>
                                     <div>
                                         <div class="fw-semibold">{{ item.titulo }}</div>
                                         {% if item.detalle %}<p class="mb-0 small">{{ item.detalle }}</p>{% endif %}
@@ -88,7 +91,7 @@
                                         {% endif %}
                                     </div>
                                 </div>
-                                <span class="text-muted-gadp small text-nowrap">{{ item.fecha_visible|date:"d/m/Y" }}</span>
+                                <span class="text-muted-gadp small text-nowrap flex-shrink-0">{{ item.fecha_visible|date:"d/m/Y" }}</span>
                             </div>
                         </li>
                         {% empty %}
@@ -100,18 +103,18 @@
 
             <div class="tab-pane fade" id="tab-acciones">
                 <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center gap-2">
                         <span>Tareas pendientes</span>
                         {% if puede_editar %}
-                        <a class="btn btn-primary btn-sm" href="{% url 'procesos:agregar_accion' proceso.pk %}"><i class="bi bi-plus-lg"></i> Añadir</a>
+                        <a class="btn btn-primary btn-sm text-nowrap" href="{% url 'procesos:agregar_accion' proceso.pk %}"><i class="bi bi-plus-lg"></i> Añadir</a>
                         {% endif %}
                     </div>
                     <ul class="list-group list-group-flush">
                         {% for a in proceso.acciones_futuras.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
+                        <li class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                            <div class="d-flex align-items-start gap-2">
                                 {% if puede_editar %}
-                                <form method="post" action="{% url 'procesos:toggle_accion' a.pk %}">
+                                <form method="post" action="{% url 'procesos:toggle_accion' a.pk %}" class="flex-shrink-0">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-link p-0 border-0" style="line-height:0;" title="{% if a.completada %}Marcar como pendiente{% else %}Marcar como completada{% endif %}">
                                         {% if a.completada %}
@@ -122,15 +125,17 @@
                                     </button>
                                 </form>
                                 {% else %}
+                                    <span class="flex-shrink-0">
                                     {% if a.completada %}
                                         <i class="bi bi-check-circle-fill text-success fs-5"></i>
                                     {% else %}
                                         <i class="bi bi-circle text-muted-gadp fs-5"></i>
                                     {% endif %}
+                                    </span>
                                 {% endif %}
                                 <span class="{% if a.completada %}text-decoration-line-through text-muted-gadp{% endif %}">{{ a.descripcion }}</span>
                             </div>
-                            <span class="text-muted-gadp small">{{ a.fecha_limite|default:"" }}</span>
+                            <span class="text-muted-gadp small text-nowrap flex-shrink-0">{{ a.fecha_limite|default:"" }}</span>
                         </li>
                         {% empty %}
                         <li class="list-group-item text-muted-gadp">Sin acciones pendientes</li>
@@ -143,9 +148,9 @@
                 <div class="card">
                     <ul class="list-group list-group-flush">
                         {% for doc in proceso.documentos.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-file-earmark"></i> {{ doc.descripcion|default:doc.archivo.name }}</span>
-                            <a href="{{ doc.archivo.url }}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="bi bi-download"></i></a>
+                        <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                            <span class="text-break"><i class="bi bi-file-earmark"></i> {{ doc.descripcion|default:doc.archivo.name }}</span>
+                            <a href="{{ doc.archivo.url }}" class="btn btn-sm btn-outline-secondary flex-shrink-0" target="_blank"><i class="bi bi-download"></i></a>
                         </li>
                         {% empty %}
                         <li class="list-group-item text-muted-gadp">Sin documentos adjuntos</li>
@@ -156,24 +161,24 @@
         </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-lg-4">
         <div class="card p-4 mb-3">
             <span class="text-muted-gadp small text-uppercase mb-2" style="letter-spacing:.06em;">Estado actual</span>
             <span class="badge-estado {% if proceso.estado_actual.es_final %}badge-estado-final{% else %}badge-estado-activo{% endif %} fs-6 mb-3 d-inline-block" style="width:fit-content;">
                 {{ proceso.estado_actual.nombre }}
             </span>
 
-            <div class="d-flex justify-content-between py-2 border-top">
-                <span class="text-muted-gadp small">Juzgado</span>
-                <span class="small fw-semibold text-end">{{ proceso.juzgado.nombre }}</span>
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-1 py-2 border-top">
+                <span class="text-muted-gadp small flex-shrink-0">Juzgado</span>
+                <span class="small fw-semibold text-sm-end">{{ proceso.juzgado.nombre }}</span>
             </div>
-            <div class="d-flex justify-content-between py-2 border-top">
-                <span class="text-muted-gadp small">Categoría</span>
-                <span class="small fw-semibold">{{ proceso.categoria.nombre }}</span>
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-1 py-2 border-top">
+                <span class="text-muted-gadp small flex-shrink-0">Categoría</span>
+                <span class="small fw-semibold text-sm-end">{{ proceso.categoria.nombre }}</span>
             </div>
-            <div class="d-flex justify-content-between py-2 border-top">
-                <span class="text-muted-gadp small">Abogado a cargo</span>
-                <span class="small fw-semibold text-end">{{ proceso.abogado_a_cargo|default:"Sin asignar" }}</span>
+            <div class="d-flex flex-column flex-sm-row justify-content-between gap-1 py-2 border-top">
+                <span class="text-muted-gadp small flex-shrink-0">Abogado a cargo</span>
+                <span class="small fw-semibold text-sm-end">{{ proceso.abogado_a_cargo|default:"Sin asignar" }}</span>
             </div>
             {% if puede_editar %}
             <a href="{% url 'procesos:editar' proceso.pk %}" class="btn btn-gold btn-sm w-100 mt-3">

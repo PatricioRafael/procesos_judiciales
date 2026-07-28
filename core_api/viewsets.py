@@ -51,7 +51,7 @@ class ParteViewSet(viewsets.ModelViewSet):
     serializer_class = ParteSerializer
     permission_classes = [EsAdminJuridicoOSuperadmin]
     filterset_fields = ["tipo_persona"]
-    search_fields = ["nombre", "nro_documento"]
+    search_fields = ["nombre"]
 
 
 class AbogadoViewSet(viewsets.ReadOnlyModelViewSet):
