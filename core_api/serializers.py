@@ -105,7 +105,7 @@ class ProcesoListaSerializer(serializers.ModelSerializer):
         model = Proceso
         fields = [
             "id", "nro_correlativo", "nurej", "categoria", "categoria_nombre",
-            "juzgado_nombre", "estado_nombre", "abogado_nombre", "abogado_referencia",
+            "juzgado_nombre", "estado_nombre", "abogado_nombre",
             "activo", "actualizado_en",
         ]
 
@@ -132,7 +132,7 @@ class ProcesoDetalleSerializer(serializers.ModelSerializer):
         model = Proceso
         fields = [
             "id", "nro_correlativo", "nurej", "categoria", "tipo_proceso", "juzgado",
-            "estado_actual", "abogado_responsable", "abogado_responsable_id", "abogado_referencia",
+            "estado_actual", "abogado_responsable", "abogado_responsable_id",
             "fecha_registro", "activo", "creado_en", "actualizado_en",
             "partes", "historial", "acciones_futuras", "documentos", "detalle_contrato",
         ]
