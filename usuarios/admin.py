@@ -18,17 +18,15 @@ class UserAdmin(DjangoUserAdmin):
     @admin.display(description="Rol")
     def get_rol(self, obj):
         if obj.is_superuser:
-            return "Superadmin"
+            return "Administrador"
         return getattr(getattr(obj, "perfil", None), "get_rol_display", lambda: "-")()
 
     def get_inline_instances(self, request, obj=None):
-        # Un usuario recién creado no tiene perfil hasta guardarse; evita error en /add
         if obj is None:
             return []
         return super().get_inline_instances(request, obj)
 
     def has_module_permission(self, request):
-        # Solo el superadmin (área de sistemas) gestiona cuentas de usuario
         return request.user.is_superuser
 
 
@@ -43,10 +41,10 @@ class RegistroAuditoriaAdmin(admin.ModelAdmin):
     readonly_fields = [f.name for f in RegistroAuditoria._meta.fields]
 
     def has_add_permission(self, request):
-        return False  # los registros solo se crean automáticamente, nunca a mano
+        return False
 
     def has_change_permission(self, request, obj=None):
-        return False  # de solo lectura, para no alterar el historial
+        return False
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser

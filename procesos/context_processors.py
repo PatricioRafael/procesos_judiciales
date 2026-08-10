@@ -1,10 +1,9 @@
 from datetime import date, timedelta
 
-DIAS_AVISO = 7  # con cuántos días de anticipación empieza a avisar
+DIAS_AVISO = 7
 
 
 def _clasificar(fecha_limite, hoy):
-    """Devuelve (tipo, texto) según qué tan cerca está la fecha."""
     dias = (fecha_limite - hoy).days
     if dias < 0:
         return "vencido", f"Venció hace {abs(dias)} día{'s' if abs(dias) != 1 else ''}"

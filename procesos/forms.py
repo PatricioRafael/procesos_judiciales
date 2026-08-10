@@ -6,11 +6,6 @@ from procesos.models import AccionFutura, Evento, HistorialEstado
 
 
 class ProcesoForm(BootstrapFormMixin, forms.Form):
-    """
-    Formulario de una sola página, con exactamente las columnas del
-    documento oficial de procesos judiciales: Demandante, Proyecto/Motivo,
-    Demandado, Juzgado, NUREJ, Estado actual, Profesional a cargo.
-    """
 
     categoria = forms.ModelChoiceField(queryset=Categoria.objects.all(), label="Categoría del proceso")
 
@@ -55,8 +50,6 @@ class ProcesoForm(BootstrapFormMixin, forms.Form):
         self.fields["fecha_registro"].widget.attrs["max"] = date.today().isoformat()
 
     def _nombres_enviados(self, campo):
-        """Recoge todos los valores enviados con el mismo nombre de campo
-        (el formulario permite agregar varias filas para un mismo rol)."""
         if hasattr(self.data, "getlist"):
             valores = self.data.getlist(campo)
         else:

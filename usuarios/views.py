@@ -9,16 +9,16 @@ from usuarios.forms import ResetearPasswordForm, UsuarioCreateForm, UsuarioUpdat
 from usuarios.models import Perfil, RegistroAuditoria
 
 
-class SoloSuperadminMixin(UserPassesTestMixin):
+class SoloAdministradorMixin(UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_superuser
 
     def handle_no_permission(self):
         from django.core.exceptions import PermissionDenied
-        raise PermissionDenied("Solo el superadministrador puede gestionar usuarios.")
+        raise PermissionDenied("Solo el administrador puede gestionar usuarios.")
 
 
-class UsuarioListView(SoloSuperadminMixin, View):
+class UsuarioListView(SoloAdministradorMixin, View):
     def get(self, request):
         filtro = request.GET.get("filtro", "todos")
         q = request.GET.get("q", "")
@@ -37,14 +37,14 @@ class UsuarioListView(SoloSuperadminMixin, View):
             "q": q,
             "total_usuarios": User.objects.count(),
             "activos_ahora": User.objects.filter(is_active=True).count(),
-            "roles_definidos": len(Perfil.Rol.choices) + 1,  # + Superadmin
+            "roles_definidos": len(Perfil.Rol.choices) + 1,  # + Administrador
             "ultima_auditoria": RegistroAuditoria.objects.first(),
             "actividad_reciente": RegistroAuditoria.objects.filter(modulo="User Management")[:5],
         }
         return render(request, "usuarios/lista.html", contexto)
 
 
-class UsuarioCreateView(SoloSuperadminMixin, View):
+class UsuarioCreateView(SoloAdministradorMixin, View):
     def get(self, request):
         return render(request, "usuarios/formulario.html", {"form": UsuarioCreateForm(), "modo": "crear"})
 
@@ -65,7 +65,7 @@ class UsuarioCreateView(SoloSuperadminMixin, View):
         return render(request, "usuarios/formulario.html", {"form": form, "modo": "crear"})
 
 
-class UsuarioUpdateView(SoloSuperadminMixin, View):
+class UsuarioUpdateView(SoloAdministradorMixin, View):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         form = UsuarioUpdateForm(initial={
@@ -92,7 +92,7 @@ class UsuarioUpdateView(SoloSuperadminMixin, View):
         return render(request, "usuarios/formulario.html", {"form": form, "modo": "editar", "usuario_editado": user})
 
 
-class ResetearPasswordView(SoloSuperadminMixin, View):
+class ResetearPasswordView(SoloAdministradorMixin, View):
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         return render(request, "usuarios/resetear_password.html", {"form": ResetearPasswordForm(), "usuario_editado": user})
@@ -108,7 +108,7 @@ class ResetearPasswordView(SoloSuperadminMixin, View):
         return render(request, "usuarios/resetear_password.html", {"form": form, "usuario_editado": user})
 
 
-class ToggleActivoView(SoloSuperadminMixin, View):
+class ToggleActivoView(SoloAdministradorMixin, View):
     def post(self, request, pk):
         user = get_object_or_404(User, pk=pk)
         user.is_active = not user.is_active
@@ -117,7 +117,7 @@ class ToggleActivoView(SoloSuperadminMixin, View):
         return redirect("usuarios:lista")
 
 
-class AuditoriaListView(SoloSuperadminMixin, View):
+class AuditoriaListView(SoloAdministradorMixin, View):
     def get(self, request):
         qs = RegistroAuditoria.objects.select_related("usuario").all()
 
@@ -168,9 +168,7 @@ class LoginPersonalizadoView(LoginView):
     def form_valid(self, form):
         recordarme = self.request.POST.get("recordarme")
         if recordarme:
-            # 2 semanas (en segundos)
             self.request.session.set_expiry(60 * 60 * 24 * 14)
         else:
-            # La sesión se cierra al cerrar el navegador
             self.request.session.set_expiry(0)
         return super().form_valid(form)

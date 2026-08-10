@@ -16,9 +16,6 @@ INDICADORES_JURIDICA = [
 
 
 def detectar_tipo_persona(nombre):
-    """Deduce si un nombre corresponde a persona natural o jurídica.
-    Es una aproximación: puede equivocarse con siglas poco comunes, y en
-    esos casos se corrige a mano desde Configuración → Partes procesales."""
     from catalogos.models import Parte
 
     texto = (nombre or "").upper()
@@ -29,14 +26,10 @@ def detectar_tipo_persona(nombre):
 
 
 def normalizar(texto):
-    """Quita espacios sobrantes y al inicio/final."""
     return re.sub(r"\s+", " ", (texto or "")).strip()
 
 
 def normalizar_mayusculas(texto):
-    """Normaliza espacios y pasa a mayúsculas. Se usa en los nombres que se
-    crean automáticamente desde texto libre (partes, juzgados, tipos de
-    proceso), para que no se dupliquen por diferencias de capitalización."""
     return normalizar(texto).upper()
 
 

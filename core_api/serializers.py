@@ -94,7 +94,6 @@ class DocumentoProcesoSerializer(serializers.ModelSerializer):
 
 
 class ProcesoListaSerializer(serializers.ModelSerializer):
-    """Versión ligera para listados/tablas."""
 
     categoria_nombre = serializers.CharField(source="categoria.nombre", read_only=True)
     juzgado_nombre = serializers.CharField(source="juzgado.nombre", read_only=True)
@@ -116,7 +115,6 @@ class ProcesoListaSerializer(serializers.ModelSerializer):
 
 
 class ProcesoDetalleSerializer(serializers.ModelSerializer):
-    """Versión completa: partes, historial, acciones y detalle de contrato."""
 
     partes = ProcesoParteSerializer(many=True, read_only=True)
     historial = HistorialEstadoSerializer(many=True, read_only=True)

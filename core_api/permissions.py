@@ -1,9 +1,7 @@
 from rest_framework import permissions
 from usuarios.models import es_admin_juridico, es_abogado
 
-class EsAdminJuridicoOSuperadmin(permissions.BasePermission):
-    """Solo admin jurídico o superadmin pueden gestionar catálogos.
-    Cualquier usuario autenticado puede leerlos."""
+class EsAdminJuridicoOAdministrador(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -12,11 +10,6 @@ class EsAdminJuridicoOSuperadmin(permissions.BasePermission):
 
 
 class PermisoProceso(permissions.BasePermission):
-    """
-    - Superadmin y admin jurídico: acceso total.
-    - Abogado: puede ver (listar/detalle) todos los procesos, pero solo
-      puede crear/editar/eliminar los que tiene asignados.
-    """
 
     def has_permission(self, request, view):
         user = request.user
@@ -38,8 +31,6 @@ class PermisoProceso(permissions.BasePermission):
 
 
 class PermisoSubrecursoDeProceso(permissions.BasePermission):
-    """Para historial, acciones futuras y documentos: sigue la misma
-    regla que el proceso padre."""
 
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated

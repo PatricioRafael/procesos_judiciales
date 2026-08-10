@@ -82,13 +82,11 @@ class ProcesoCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             fecha_registro=datos.get("fecha_registro") or date.today(),
         )
 
-        # Demandantes (uno o varios)
         for nombre_activa in getattr(form, "partes_activas_lista", []):
             parte = obtener_o_crear_parte(nombre_activa)
             if parte:
                 ProcesoParte.objects.get_or_create(proceso=proceso, parte=parte, rol=ProcesoParte.Rol.ACTIVA)
 
-        # Demandado: en Contencioso siempre es el GADP; en las demás, lo que escribió el usuario
         if datos["categoria"].nombre == "Contencioso":
             parte = obtener_o_crear_parte("Gobierno Autónomo Departamental de Potosí")
             ProcesoParte.objects.get_or_create(proceso=proceso, parte=parte, rol=ProcesoParte.Rol.PASIVA)
@@ -104,15 +102,12 @@ class ProcesoCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                 proceso.tipo_proceso = tipo_proceso
                 proceso.save(update_fields=["tipo_proceso"])
 
-        # Estado actual del proceso, tal como en el documento oficial: se guarda como
-        # la primera entrada del historial.
         if datos.get("estado_actual_texto"):
             HistorialEstado.objects.create(
                 proceso=proceso, estado_nuevo=datos["estado_actual"],
                 usuario=user, observacion=datos["estado_actual_texto"],
             )
 
-        # Documentos adjuntos (máximo 3, ya validado en post())
         for archivo in self.request.FILES.getlist("documentos"):
             DocumentoProceso.objects.create(
                 proceso=proceso, archivo=archivo, subido_por=user, descripcion=archivo.name
@@ -186,8 +181,6 @@ class ProcesoDetailView(LoginRequiredMixin, DetailView):
         return ctx
 
     def _construir_linea_tiempo(self, proceso):
-        """Junta en una sola lista cronológica: actuaciones, eventos,
-        acciones futuras, documentos y las ediciones registradas en auditoría."""
         from usuarios.models import RegistroAuditoria
 
         items = []
@@ -290,7 +283,7 @@ class ProcesoUpdateView(LoginRequiredMixin, PuedeEditarProcesoMixin, UpdateView)
 
 
 class AgregarHistorialView(LoginRequiredMixin, PuedeEditarProcesoMixin, CreateView):
-    model = Proceso  # se usa solo para que el mixin de permisos reutilice get_object()
+    model = Proceso
     form_class = HistorialEstadoForm
     template_name = "procesos/agregar_historial.html"
 
@@ -360,7 +353,6 @@ class ProcesoDashboardView(LoginRequiredMixin, TemplateView):
         from procesos.models import AccionFutura
         ctx["tareas_pendientes"] = AccionFutura.objects.filter(completada=False).count()
 
-        # Donut: distribución por cada estado con procesos
         PALETA = [
             "#8b0000", "#c5a059", "#1c1917", "#a8a29e", "#1f9d55",
             "#b45309", "#6b21a8", "#0e7490", "#be123c", "#4d7c0f",
@@ -391,7 +383,6 @@ class ProcesoDashboardView(LoginRequiredMixin, TemplateView):
             f"{s['color']} {s['desde']}% {s['hasta']}%" for s in segmentos
         ) or "var(--color-border) 0% 100%"
 
-        # Barras: procesos por categoría
         categorias_con_total = (
             Categoria.objects.annotate(total_procesos=Count("procesos")).order_by("-total_procesos")
         )
@@ -533,7 +524,6 @@ def exportar_pdf(request):
             Paragraph(p.estado_actual.nombre, estilo_celda),
         ])
 
-    # Anchos de columna ajustados para hoja horizontal (carta apaisada = ~10 pulgadas útiles)
     anchos = [0.4 * 72, 0.9 * 72, 1.1 * 72, 2.3 * 72, 2.3 * 72, 1.7 * 72, 1.3 * 72]
 
     tabla = Table(datos, colWidths=anchos, repeatRows=1)

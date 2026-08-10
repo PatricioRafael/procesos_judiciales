@@ -148,8 +148,6 @@ class DocumentoProceso(models.Model):
         return self.descripcion or self.archivo.name
     
 class Evento(models.Model):
-    """Audiencias, vencimientos de plazo y recordatorios, opcionalmente
-    ligados a un proceso."""
 
     class Tipo(models.TextChoices):
         AUDIENCIA = "AUDIENCIA", "Audiencia"

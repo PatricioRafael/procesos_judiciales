@@ -17,8 +17,6 @@ def get_client_ip(request):
 
 
 class RequestActualMiddleware:
-    """Guarda la request en un hilo local para que las señales (que no
-    reciben la request) puedan saber quién y desde qué IP se hizo algo."""
 
     def __init__(self, get_response):
         self.get_response = get_response

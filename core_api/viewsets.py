@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 
 from catalogos.models import Categoria, EstadoProceso, Juzgado, Parte, TipoProceso
-from core_api.permissions import EsAdminJuridicoOSuperadmin, PermisoProceso, PermisoSubrecursoDeProceso
+from core_api.permissions import EsAdminJuridicoOAdministrador, PermisoProceso, PermisoSubrecursoDeProceso
 from core_api.serializers import (
     AccionFuturaSerializer,
     CategoriaSerializer,
@@ -24,38 +24,37 @@ from usuarios.models import es_admin_juridico, es_abogado
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
-    permission_classes = [EsAdminJuridicoOSuperadmin]
+    permission_classes = [EsAdminJuridicoOAdministrador]
 
 
 class TipoProcesoViewSet(viewsets.ModelViewSet):
     queryset = TipoProceso.objects.select_related("categoria").all()
     serializer_class = TipoProcesoSerializer
-    permission_classes = [EsAdminJuridicoOSuperadmin]
+    permission_classes = [EsAdminJuridicoOAdministrador]
     filterset_fields = ["categoria"]
 
 
 class JuzgadoViewSet(viewsets.ModelViewSet):
     queryset = Juzgado.objects.all()
     serializer_class = JuzgadoSerializer
-    permission_classes = [EsAdminJuridicoOSuperadmin]
+    permission_classes = [EsAdminJuridicoOAdministrador]
 
 
 class EstadoProcesoViewSet(viewsets.ModelViewSet):
     queryset = EstadoProceso.objects.all()
     serializer_class = EstadoProcesoSerializer
-    permission_classes = [EsAdminJuridicoOSuperadmin]
+    permission_classes = [EsAdminJuridicoOAdministrador]
 
 
 class ParteViewSet(viewsets.ModelViewSet):
     queryset = Parte.objects.all()
     serializer_class = ParteSerializer
-    permission_classes = [EsAdminJuridicoOSuperadmin]
+    permission_classes = [EsAdminJuridicoOAdministrador]
     filterset_fields = ["tipo_persona"]
     search_fields = ["nombre"]
 
 
 class AbogadoViewSet(viewsets.ReadOnlyModelViewSet):
-    """Lista de abogados, para poblar selects de asignación."""
 
     queryset = User.objects.filter(perfil__rol="ABOGADO", is_active=True).order_by("first_name", "last_name")
     serializer_class = UsuarioResumenSerializer

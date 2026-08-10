@@ -383,7 +383,7 @@
                 <div class="small lh-sm usuario-datos">
                     <div class="fw-semibold">{{ user.get_full_name|default:user.username }}</div>
                     <div class="text-muted-gadp">
-                        {% if user.is_superuser %}Superadmin{% elif user.perfil.es_admin_juridico %}Admin jurídico{% else %}Abogado{% endif %}
+                        {% if user.is_superuser %}Administrador{% elif user.perfil.es_admin_juridico %}Admin jurídico{% else %}Abogado{% endif %}
                     </div>
                 </div>
             </div>
@@ -426,7 +426,6 @@ function cerrarSidebar() {
     document.querySelector(".sidebar").classList.remove("abierto");
     document.querySelector("#sidebarBackdrop").classList.remove("visible");
 }
-// Al hacer clic en cualquier enlace del menú, se cierra solo
 document.querySelectorAll(".sidebar a").forEach(a => a.addEventListener("click", cerrarSidebar));
 </script>
 {% block extra_js %}{% endblock %}

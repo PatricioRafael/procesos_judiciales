@@ -23,7 +23,7 @@ class SoloAdminJuridicoMixin(UserPassesTestMixin):
         return es_admin_juridico(self.request.user)
 
     def handle_no_permission(self):
-        raise PermissionDenied("Solo el área jurídica o el superadmin pueden gestionar catálogos.")
+        raise PermissionDenied("Solo el área jurídica o el administrador pueden gestionar catálogos.")
 
 
 class CatalogoListView(LoginRequiredMixin, SoloAdminJuridicoMixin, View):

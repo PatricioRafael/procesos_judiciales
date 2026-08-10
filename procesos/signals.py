@@ -19,8 +19,6 @@ CAMPOS_AUDITADOS = {
 
 @receiver(pre_save, sender=Proceso)
 def guardar_estado_previo(sender, instance, **kwargs):
-    """Antes de guardar, lee cómo estaba el registro en la base de datos
-    para poder comparar después qué campos cambiaron."""
     if not instance.pk:
         instance._estado_previo = None
         return
@@ -59,7 +57,7 @@ def auditar_proceso_guardado(sender, instance, created, **kwargs):
             }
 
     if not cambios:
-        return  # se guardó pero nada relevante cambió, no vale la pena registrarlo
+        return
 
     registrar("Editado Proceso", modulo=modulo, detalle={
         "proceso_id": instance.id,

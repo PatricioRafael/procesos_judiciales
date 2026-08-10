@@ -2,7 +2,6 @@ from django import forms
 
 
 def aplicar_clases_bootstrap(form):
-    """Agrega clases CSS de Bootstrap a los widgets de un formulario ya construido."""
     for field in form.fields.values():
         if isinstance(field.widget, forms.CheckboxInput):
             css = "form-check-input"
@@ -15,7 +14,6 @@ def aplicar_clases_bootstrap(form):
 
 
 class BootstrapFormMixin:
-    """Agrega clases de Bootstrap a los widgets automáticamente."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,7 +21,6 @@ class BootstrapFormMixin:
 
 
 class JuridicoAdminPermissionMixin:
-    """Restringe un ModelAdmin al área jurídica (admin) y al superadmin."""
 
     def has_module_permission(self, request):
         return request.user.is_superuser or (
