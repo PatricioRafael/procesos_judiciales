@@ -92,6 +92,15 @@ class DocumentoProcesoSerializer(serializers.ModelSerializer):
         fields = ["id", "proceso", "archivo", "descripcion", "subido_por", "fecha_subida"]
         read_only_fields = ["subido_por", "fecha_subida"]
 
+    def validate_archivo(self, archivo):
+        if not archivo.name.lower().endswith(".pdf"):
+            raise serializers.ValidationError("Solo se aceptan archivos .pdf.")
+        cabecera = archivo.read(5)
+        archivo.seek(0)
+        if cabecera != b"%PDF-":
+            raise serializers.ValidationError("El archivo no es un PDF válido.")
+        return archivo
+
 
 class ProcesoListaSerializer(serializers.ModelSerializer):
 

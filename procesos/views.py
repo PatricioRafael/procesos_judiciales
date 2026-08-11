@@ -56,6 +56,10 @@ class ProcesoCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                 return f"'{archivo.name}' no es un PDF. Solo se aceptan archivos .pdf."
             if archivo.size > self.MAX_TAMANO_MB * 1024 * 1024:
                 return f"'{archivo.name}' pesa demasiado ({archivo.size / 1024 / 1024:.1f} MB). El máximo permitido es {self.MAX_TAMANO_MB} MB."
+            cabecera = archivo.read(5)
+            archivo.seek(0)
+            if cabecera != b"%PDF-":
+                return f"'{archivo.name}' no es un PDF válido: el contenido no coincide con su extensión."
         return None
 
     def form_valid(self, form):
